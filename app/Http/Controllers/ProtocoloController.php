@@ -13,25 +13,23 @@ class ProtocoloController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Protocolo $p)
+    public function index(Request $request, Protocolo $p)
     {
-        $protocolos = $p->orderBy('id', 'desc')->paginate(10);
-        return view('admin.protocolo.index',compact('protocolos'));
-    }
+        $dataForm = [];
+        if(!empty($request->pesquisa_nome)){
 
-    public function procura(Request $request,Protocolo $p)
-    {
-        $dataform = $request->except('_token');
+        $dataForm = $request->except('_token');
         
-            $protocolos = $p->where('nome_representante', 'like', '%'.$request->pesquisa_nome.'%')
-                            ->orwhere('nome_empresa', 'like', '%'.$request->pesquisa_nome.'%')
-                            ->orwhere('cpf_representante', 'like', '%'.$request->pesquisa_nome.'%')
-                            ->orwhere('cnpj_empresa', 'like', '%'.$request->pesquisa_nome.'%')
-                            ->orderBy('id', 'desc')->paginate(10);
+        $protocolos = $p->where('nome_representante', 'like', '%'.$request->pesquisa_nome.'%')
+                        ->orwhere('nome_empresa', 'like', '%'.$request->pesquisa_nome.'%')
+                        ->orwhere('cpf_representante', 'like', '%'.$request->pesquisa_nome.'%')
+                        ->orwhere('cnpj_empresa', 'like', '%'.$request->pesquisa_nome.'%')
+                        ->orderBy('id', 'desc')->paginate(50);
+        } else {
+            $protocolos = $p->orderBy('id', 'desc')->paginate(50);
+        }
         
-       
-        return view('admin.protocolo.index',compact('protocolos','dataform'));
-       
+        return view('admin.protocolo.index',compact('protocolos', 'dataForm'));
     }
 
     /**

@@ -21,6 +21,6 @@ $this->get('/', 'HomeController@index')->name('home');
 $this->get('users/{id}/delete','UserController@destroy')->name('users.destroy')->middleware('auth');
 
 //PESQUISAR PROTOCOLOS
-$this->any('protocolos/procura','ProtocoloController@procura')->name('protocolos.procura')->middleware('auth');
+//$this->get('protocolos/procura','ProtocoloController@procura')->name('protocolos.procura')->middleware('auth');
 
 Auth::routes();

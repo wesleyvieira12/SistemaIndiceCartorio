@@ -11,8 +11,7 @@
     <div class="box">
             <div class="box-header with-border">
             <div class="col-lg-11">
-              <form class="form-inline" action="{{ route('protocolos.procura') }}" method="post">
-              {!! csrf_field() !!}
+              <form class="form-inline" action="{{ route('protocolos.index')}}" method="get">
 		           <div class="form-group">
 			            <input type="text" name="pesquisa_nome" class="form-control">
 		        	 </div>
@@ -72,10 +71,10 @@
               </tbody></table>
             </div>
             <!-- /.box-body -->
-            @if(!isset($dataform))
+            @if(!isset($dataForm))
               {{$protocolos->links()}}
             @else
-              {{$protocolos->appends($dataform)->links()}}
+              {{$protocolos->appends($dataForm)->links()}}
             @endif
           </div>
           <script language="JavaScript"> 
