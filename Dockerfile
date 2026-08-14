@@ -26,9 +26,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # (PackageManifest: Undefined index: name)
 COPY --from=composer:1.10 /usr/bin/composer /usr/bin/composer
 
-# Node 16 (compatível com laravel-mix 1.x deste projeto)
-RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
-    && apt-get install -y --no-install-recommends nodejs \
+# Node 14: laravel-mix 1 puxa node-sass@4, que NÃO tem binário para Node 16
+# (em Node 16 o npm tenta compilar e falha sem python/g++)
+COPY --from=node:14-bullseye /usr/local/bin/node /usr/local/bin/node
+COPY --from=node:14-bullseye /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
+    && node -v && npm -v
+
+# Ferramentas nativas (fallback se algum pacote precisar rebuild)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        python3 \
+        make \
+        g++ \
+    && ln -sf /usr/bin/python3 /usr/bin/python \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
