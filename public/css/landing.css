@@ -270,17 +270,32 @@ a {
     align-items: end;
 }
 
-.contact-email {
+.contact-whatsapp {
     display: inline-block;
     font-family: var(--font-display);
     font-size: clamp(1.35rem, 3vw, 1.85rem);
     color: var(--gold-soft);
     border-bottom: 1px solid transparent;
-    transition: border-color 0.25s ease;
+    transition: border-color 0.25s ease, color 0.25s ease;
+}
+
+.contact-whatsapp:hover {
+    border-bottom-color: var(--gold);
+    color: var(--gold);
+}
+
+.contact-email {
+    display: block;
+    margin-top: 0.85rem;
+    font-size: 1rem;
+    color: var(--muted);
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.25s ease, color 0.25s ease;
 }
 
 .contact-email:hover {
-    border-bottom-color: var(--gold);
+    color: var(--gold-soft);
+    border-bottom-color: var(--line);
 }
 
 .contact-address {

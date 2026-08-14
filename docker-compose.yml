@@ -1,33 +1,28 @@
 services:
-  traefik:
-    image: traefik:v2.11
-    container_name: indice_traefik
-    restart: unless-stopped
+  reverse-proxy:  
+    image: traefik:3.0  
+    command:  
+      - "--api=true"  
+      - "--api.insecure=false"  
+      - "--providers.docker=true"  
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=1serventiaimoveisoeiras@gmail.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
     ports:
       - "80:80"
       - "443:443"
+      - "8080:8080"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - traefik_letsencrypt:/letsencrypt
-    command:
-      - --log.level=DEBUG
-      - --accesslog=true
-      - --api.dashboard=false
-      - --providers.docker=true
-      - --providers.docker.exposedbydefault=false
-      - --providers.docker.network=indice_traefik
-      - --providers.docker.watch=true
-      - --entrypoints.web.address=:80
-      - --entrypoints.web.http.redirections.entrypoint.to=websecure
-      - --entrypoints.web.http.redirections.entrypoint.scheme=https
-      - --entrypoints.web.http.redirections.entrypoint.permanent=true
-      - --entrypoints.websecure.address=:443
-      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
-      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
-      - --certificatesresolvers.letsencrypt.acme.email=${TRAEFIK_ACME_EMAIL:-admin@1serventiaimoveisoeiras.com.br}
-      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
-    networks:
-      - traefik
+      - ./letsencrypt:/letsencrypt  
+      - /var/run/docker.sock:/var/run/docker.sock
+  whoami:  
+    image: traefik/whoami  
+    labels:  
+      - "traefik.http.routers.whoami.rule=Host(`1serventiaimoveisoeiras.com.br`)"
+      - "traefik.http.routers.whoami.entrypoints=websecure"
+      - "traefik.http.routers.whoami.tls.certresolver=myresolver"
 
   app:
     build:

@@ -38,7 +38,7 @@
                 </p>
                 <div class="hero-actions">
                     <a class="btn btn-gold" href="/login">Entrar no sistema</a>
-                    <a class="btn btn-ghost" href="#contato">Falar conosco</a>
+                    <a class="btn btn-ghost" href="https://wa.me/558981517066" target="_blank" rel="noopener noreferrer">WhatsApp</a>
                 </div>
             </div>
         </section>
@@ -71,6 +71,14 @@
                     <p class="section-lead">Canal oficial para assuntos de Registro de Imóveis.</p>
                 </div>
                 <div class="contact-details">
+                    <a
+                        class="contact-whatsapp"
+                        href="https://wa.me/558981517066"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        WhatsApp (89) 8151-7066
+                    </a>
                     <a class="contact-email" href="mailto:1serventiaimoveisoeiras@gmail.com">
                         1serventiaimoveisoeiras@gmail.com
                     </a>
