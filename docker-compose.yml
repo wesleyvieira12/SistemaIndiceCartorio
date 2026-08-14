@@ -1,5 +1,5 @@
 services:
-  reverse-proxy:  
+  traefik:  
     image: traefik:3.0  
     command:  
       - "--api=true"  
@@ -20,7 +20,7 @@ services:
   whoami:  
     image: traefik/whoami  
     labels:  
-      - "traefik.http.routers.whoami.rule=Host(`1serventiaimoveisoeiras.com.br`)"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.1serventiaimoveisoeiras.com.br`)"
       - "traefik.http.routers.whoami.entrypoints=websecure"
       - "traefik.http.routers.whoami.tls.certresolver=myresolver"
 
