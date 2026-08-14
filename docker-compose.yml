@@ -16,6 +16,9 @@ services:
       - --providers.docker.exposedbydefault=false
       - --providers.docker.network=indice_traefik
       - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.web.http.redirections.entrypoint.permanent=true
       - --entrypoints.websecure.address=:443
       - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
       - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
@@ -63,11 +66,6 @@ services:
     labels:
       - "traefik.enable=${TRAEFIK_ENABLE:-true}"
       - "traefik.docker.network=indice_traefik"
-      - "traefik.http.middlewares.indice-https-redirect.redirectscheme.scheme=https"
-      - "traefik.http.routers.indice.rule=Host(`${TRAEFIK_HOST:-1serventiaimoveisoeiras.com.br}`)"
-      - "traefik.http.routers.indice.entrypoints=web"
-      - "traefik.http.routers.indice.middlewares=indice-https-redirect"
-      - "traefik.http.routers.indice.service=indice"
       - "traefik.http.routers.indice-secure.rule=Host(`${TRAEFIK_HOST:-1serventiaimoveisoeiras.com.br}`)"
       - "traefik.http.routers.indice-secure.entrypoints=websecure"
       - "traefik.http.routers.indice-secure.tls=true"
@@ -119,17 +117,13 @@ services:
     labels:
       - "traefik.enable=${TRAEFIK_ENABLE:-true}"
       - "traefik.docker.network=indice_traefik"
-      - "traefik.http.middlewares.pma-https-redirect.redirectscheme.scheme=https"
-      - "traefik.http.routers.pma.rule=Host(`${TRAEFIK_PHPMYADMIN_HOST:-phpmyadmin.1serventiaimoveisoeiras.com.br}`)"
-      - "traefik.http.routers.pma.entrypoints=web"
-      - "traefik.http.routers.pma.middlewares=pma-https-redirect"
-      - "traefik.http.routers.pma.service=pma"
       - "traefik.http.routers.pma-secure.rule=Host(`${TRAEFIK_PHPMYADMIN_HOST:-phpmyadmin.1serventiaimoveisoeiras.com.br}`)"
       - "traefik.http.routers.pma-secure.entrypoints=websecure"
       - "traefik.http.routers.pma-secure.tls=true"
       - "traefik.http.routers.pma-secure.tls.certresolver=letsencrypt"
       - "traefik.http.routers.pma-secure.service=pma"
       - "traefik.http.services.pma.loadbalancer.server.port=80"
+
 volumes:
   indice_db_data:
   traefik_letsencrypt:
