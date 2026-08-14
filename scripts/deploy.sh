@@ -77,6 +77,8 @@ rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/serv
 log "🏗️  Rebuild e restart dos containers"
 docker compose build
 docker compose up -d --remove-orphans
+# Opcache do PHP-FPM: reinicia para carregar o código novo do git
+docker compose restart app
 ok "Containers no ar"
 
 # Espera o app responder
