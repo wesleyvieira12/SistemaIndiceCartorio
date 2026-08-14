@@ -47,16 +47,32 @@ fi
 
 if [[ "$DO_PULL" -eq 1 ]]; then
   if [[ -d .git ]]; then
-    log "📥 Atualizando código (git pull)"
-    git pull --ff-only
-    ok "Código atualizado"
+    log "📥 Atualizando código (git fetch + reset para o remoto)"
+    # Descarta sujeira local de builds anteriores para o pull não falhar
+    git checkout -- \
+      bootstrap/cache/.gitignore \
+      storage \
+      package-lock.json \
+      public/css/app.css \
+      public/js/app.js \
+      2>/dev/null || true
+    git clean -fd -- public/fonts 2>/dev/null || true
+    rm -f public/mix-manifest.json
+
+    git fetch origin
+    BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+    # Servidor de deploy: código = exatamente o remoto (.env permanece, está no .gitignore)
+    git reset --hard "origin/${BRANCH}"
+    ok "Código em $(git rev-parse --short HEAD) (${BRANCH})"
   else
-    echo "⚠️  Aviso: diretório sem .git — pulando git pull"
+    echo "⚠️  Aviso: diretório sem .git — pulando atualização remota"
   fi
 fi
 
 log "📁 Garantindo diretórios de storage"
 mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache
+# Remove caches antigos do Laravel (evita rota / e /painel desatualizadas)
+rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php
 
 log "🏗️  Rebuild e restart dos containers"
 docker compose build
@@ -88,10 +104,16 @@ if [[ "$DO_SEED" -eq 1 ]]; then
   docker compose exec -T app php artisan db:seed --force
 fi
 
+docker compose exec -T app php artisan config:clear || true
+docker compose exec -T app php artisan route:clear || true
 docker compose exec -T app php artisan config:cache
 docker compose exec -T app php artisan route:cache
 # Laravel 5.5 não tem view:cache
 docker compose exec -T app php artisan queue:restart || true
+
+log "🔎 Conferindo rotas públicas"
+docker compose exec -T app php artisan route:list 2>/dev/null | grep -E 'landing|/painel|\sGET.*/\s' || true
+ok "Commit ativo: $(git rev-parse --short HEAD 2>/dev/null || echo 'n/a')"
 
 log "🔐 Ajustando permissões"
 docker compose exec -T app chown -R www-data:www-data storage bootstrap/cache || true
