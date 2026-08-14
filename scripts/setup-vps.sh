@@ -121,7 +121,8 @@ fi
 log "📁 Criando diretórios de storage e permissões"
 mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache
 chown -R "${REAL_USER}:${REAL_USER}" storage bootstrap/cache || true
-chmod -R ug+rwx storage bootstrap/cache
+find storage bootstrap/cache -type d -exec chmod ug+rwx {} \;
+find storage bootstrap/cache -type f -exec chmod ug+rw {} \;
 
 log "🏗️  Build e subida inicial dos containers"
 docker compose build
@@ -138,7 +139,7 @@ if ! grep -qE '^APP_KEY=base64:' .env; then
   ok "APP_KEY gerado"
 fi
 
-docker compose exec -T app npm install --legacy-peer-deps
+docker compose exec -T app npm install --no-package-lock --legacy-peer-deps
 docker compose exec -T app npm run production
 docker compose exec -T app php artisan storage:link || true
 docker compose exec -T app php artisan migrate --force
@@ -147,6 +148,10 @@ docker compose exec -T app php artisan route:cache
 # Laravel 5.5 não tem view:cache
 
 docker compose exec -T app chown -R www-data:www-data storage bootstrap/cache || true
+docker compose exec -T app bash -lc '
+  find storage bootstrap/cache -type d -exec chmod ug+rwx {} \;
+  find storage bootstrap/cache -type f -exec chmod ug+rw {} \;
+' || true
 
 log "📊 Status dos containers"
 docker compose ps

@@ -76,8 +76,8 @@ log "🐘 Dependências PHP (Composer)"
 docker compose exec -T app composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 
 log "🎨 Assets frontend (npm)"
-# package-lock antigo (npm 5/6) quebra npm ci no Node 16 — usar install
-docker compose exec -T app npm install --legacy-peer-deps
+# --no-package-lock: não reescreve package-lock.json no servidor
+docker compose exec -T app npm install --no-package-lock --legacy-peer-deps
 docker compose exec -T app npm run production
 
 log "⚙️  Laravel: storage link, migrate e caches"
@@ -95,7 +95,31 @@ docker compose exec -T app php artisan queue:restart || true
 
 log "🔐 Ajustando permissões"
 docker compose exec -T app chown -R www-data:www-data storage bootstrap/cache || true
-docker compose exec -T app chmod -R ug+rwx storage bootstrap/cache || true
+docker compose exec -T app bash -lc '
+  find storage bootstrap/cache -type d -exec chmod ug+rwx {} \;
+  find storage bootstrap/cache -type f -exec chmod ug+rw {} \;
+' || true
+
+# Não deixar o deploy sujar o git status
+if [[ -d .git ]]; then
+  log "🧹 Restaurando working tree após o build"
+  git checkout -- \
+    bootstrap/cache/.gitignore \
+    storage/app/.gitignore \
+    storage/app/public/.gitignore \
+    storage/framework/.gitignore \
+    storage/framework/cache/.gitignore \
+    storage/framework/sessions/.gitignore \
+    storage/framework/testing/.gitignore \
+    storage/framework/views/.gitignore \
+    storage/logs/.gitignore \
+    package-lock.json \
+    public/css/app.css \
+    public/js/app.js \
+    2>/dev/null || true
+  git clean -fd -- public/fonts 2>/dev/null || true
+  rm -f public/mix-manifest.json
+fi
 
 log "📊 Status"
 docker compose ps
