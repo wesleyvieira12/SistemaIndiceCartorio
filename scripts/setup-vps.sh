@@ -61,9 +61,10 @@ log "Configurando firewall (UFW)"
 ufw allow OpenSSH >/dev/null 2>&1 || true
 ufw allow 80/tcp >/dev/null 2>&1 || true
 ufw allow 443/tcp >/dev/null 2>&1 || true
+ufw allow 8080/tcp >/dev/null 2>&1 || true
 # Ativa UFW sem travar SSH se já estiver ativo
 ufw --force enable >/dev/null 2>&1 || true
-ok "Portas 22/80/443 liberadas"
+ok "Portas 22/80/443/8080 liberadas"
 
 log "Preparando arquivo .env"
 if [[ ! -f .env ]]; then
@@ -107,6 +108,7 @@ if ! grep -qE '^DB_ROOT_PASSWORD=' .env; then
 fi
 
 grep -qE '^APP_PORT=' .env || echo "APP_PORT=80" >> .env
+grep -qE '^PHPMYADMIN_PORT=' .env || echo "PHPMYADMIN_PORT=8080" >> .env
 
 log "Criando diretórios de storage e permissões"
 mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache
@@ -141,6 +143,9 @@ docker compose exec -T app chown -R www-data:www-data storage bootstrap/cache ||
 log "Status dos containers"
 docker compose ps
 
+PMA_PORT_MSG="$(grep -E '^PHPMYADMIN_PORT=' .env | cut -d= -f2- || echo 8080)"
+HOST_IP="$(hostname -I | awk '{print $1}')"
+
 cat <<EOF
 
 ============================================================
@@ -151,7 +156,8 @@ Próximos passos:
   2. Faça logout/login (ou: newgrp docker) para usar docker sem sudo
   3. Para novos deploys:  bash scripts/deploy.sh
 
-Aplicação: http://$(hostname -I | awk '{print $1}')
+Aplicação:   http://${HOST_IP}
+phpMyAdmin:  http://${HOST_IP}:${PMA_PORT_MSG}
 Arquivo de ambiente: ${APP_DIR}/.env
 ============================================================
 EOF

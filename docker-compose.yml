@@ -54,6 +54,22 @@ services:
     networks:
       - indice_net
 
+  phpmyadmin:
+    image: phpmyadmin:5
+    container_name: indice_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "${PHPMYADMIN_PORT:-8080}:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 64M
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - indice_net
+
 volumes:
   indice_db_data:
 
