@@ -111,7 +111,7 @@ return [
         'MENU',
         [
             'text'        => 'Inicio',
-            'url'         => '/',
+            'url'         => 'painel',
             'icon'        => 'home',
         ],
         [

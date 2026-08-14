@@ -4,11 +4,12 @@ Guia para subir o **Sistema Índice Cartório** em uma VPS Ubuntu zerada, usando
 
 ## O que sobe
 
-| Serviço     | Porta padrão | URL                         |
-|-------------|--------------|-----------------------------|
-| Aplicação   | 80           | `http://IP_DA_VPS`          |
-| phpMyAdmin  | 8080         | `http://IP_DA_VPS:8080`     |
-| MySQL       | 3306         | uso interno / opcional      |
+| Serviço     | Porta padrão | URL                              |
+|-------------|--------------|----------------------------------|
+| Aplicação   | 8081         | `http://IP_DA_VPS:8081`          |
+| phpMyAdmin  | 8080         | `http://IP_DA_VPS:8080`          |
+| Traefik     | 80 / 443     | proxy reverso (se instalado)     |
+| MySQL       | 3306         | uso interno / opcional           |
 
 ---
 
@@ -17,7 +18,8 @@ Guia para subir o **Sistema Índice Cartório** em uma VPS Ubuntu zerada, usando
 - VPS Ubuntu 20.04 / 22.04 / 24.04
 - Acesso SSH com usuário que possa usar `sudo`
 - Repositório Git do projeto (GitHub/GitLab/etc.)
-- Portas **22**, **80**, **443** e **8080** liberadas no painel do provedor (security group / firewall)
+- Portas **22**, **80**, **443**, **8080** e **8081** liberadas no painel do provedor (security group / firewall)
+- A app usa **8081** para não conflitar com o **Traefik** na porta 80
 
 ---
 
@@ -91,42 +93,26 @@ cd SistemaIndiceCartorio
 
 ---
 
-## 6. Liberar a porta 80 (e 8080, se ocupada)
+## 6. Porta da aplicação e Traefik
 
-O container `indice_nginx` usa a porta **80** do host. Se outro programa já estiver nela, o Docker falha com `address already in use`.
+O `indice_nginx` publica na porta **8081** do host (`APP_PORT=8081`), para a **80** ficar livre ao **Traefik**.
 
-Verifique o que está usando:
+No `.env`:
 
-```bash
-sudo ss -tlnp | grep -E ':80 |:8080 '
+```env
+APP_PORT=8081
+APP_URL=http://IP_DA_VPS:8081
 ```
 
-Em VPS Ubuntu, costuma ser **Apache** ou **nginx** do sistema. Pare e desabilite:
+Acesso direto (sem Traefik): `http://IP_DA_VPS:8081`
+
+Se o Traefik já estiver na 80, **não** precisa pará-lo. Confira:
 
 ```bash
-# Apache
-sudo systemctl stop apache2
-sudo systemctl disable apache2
-
-# nginx do host (não o container Docker)
-sudo systemctl stop nginx
-sudo systemctl disable nginx
+sudo ss -tlnp | grep -E ':80 |:8081 |:8080 '
 ```
 
-Confirme que a porta ficou livre:
-
-```bash
-sudo ss -tlnp | grep -E ':80 |:8080 '
-```
-
-(não deve listar nada, ou só processos que você realmente quer manter)
-
-Opcional — remover de vez (só se não precisar mais desses serviços):
-
-```bash
-sudo apt remove -y apache2 nginx
-sudo apt autoremove -y
-```
+Só libere a **8081** se estiver ocupada por outro serviço. Apache/nginx do sistema na 80 podem permanecer se o Traefik for o proxy desejado — ou pare-os se forem redundantes.
 
 ---
 
@@ -164,8 +150,8 @@ nano .env
 Campos importantes:
 
 ```env
-APP_URL=http://IP_DA_VPS
-# ou, se já tiver domínio:
+APP_URL=http://IP_DA_VPS:8081
+# ou, se o Traefik já apontar o domínio para o app:
 # APP_URL=http://seusite.com.br
 
 APP_ENV=production
@@ -177,7 +163,7 @@ DB_USERNAME=cartorio
 DB_PASSWORD=...          # gerado no setup (não apague sem necessidade)
 DB_ROOT_PASSWORD=...     # gerado no setup
 
-APP_PORT=80
+APP_PORT=8081
 PHPMYADMIN_PORT=8080
 ```
 
@@ -201,7 +187,7 @@ Os containers `indice_app`, `indice_nginx`, `indice_db` e `indice_phpmyadmin` de
 
 Teste no navegador:
 
-- App: `http://IP_DA_VPS`
+- App: `http://IP_DA_VPS:8081`
 - phpMyAdmin: `http://IP_DA_VPS:8080`
 
 No phpMyAdmin, entre com:
@@ -257,14 +243,17 @@ docker compose exec app php artisan ...
 
 ## Problemas comuns
 
-### `address already in use` na porta 80
-Algo no host já usa a porta (Apache/nginx, etc.). Veja a [seção 6](#6-liberar-a-porta-80-e-8080-se-ocupada), liberte a porta e rode de novo:
+### `address already in use` na porta 8081
+Algo no host já usa a porta do app. Confira `APP_PORT` no `.env` e:
 
 ```bash
+sudo ss -tlnp | grep ':8081 '
 docker compose up -d
 ```
 
-### Porta 80 ou 8080 não abre no navegador
+A porta **80** pode continuar com o Traefik — o nginx do projeto não usa mais a 80.
+
+### Porta 8081 ou 8080 não abre no navegador
 - Libere no **firewall do provedor** (além do UFW da VPS).
 - Confira: `sudo ufw status`
 
@@ -320,11 +309,9 @@ cat ~/.ssh/id_ed25519.pub   # cole no GitHub (SSH keys ou Deploy keys)
 ssh -T git@github.com
 cd /var/www && git clone git@github.com:SEU_USUARIO/SistemaIndiceCartorio.git SistemaIndiceCartorio
 cd SistemaIndiceCartorio
-sudo ss -tlnp | grep -E ':80 |:8080 '   # se ocupada, stop/disable apache2 ou nginx
-sudo systemctl stop apache2 nginx 2>/dev/null; sudo systemctl disable apache2 nginx 2>/dev/null
 sudo bash scripts/setup-vps.sh
-nano .env   # ajuste APP_URL
+nano .env   # APP_PORT=8081 e APP_URL=http://IP:8081
 docker compose exec -T app php artisan config:cache
 ```
 
-Pronto: app na porta **80**, phpMyAdmin na **8080**.
+Pronto: app na porta **8081**, phpMyAdmin na **8080**, Traefik livre na **80**.

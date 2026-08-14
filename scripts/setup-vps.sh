@@ -62,9 +62,10 @@ ufw allow OpenSSH >/dev/null 2>&1 || true
 ufw allow 80/tcp >/dev/null 2>&1 || true
 ufw allow 443/tcp >/dev/null 2>&1 || true
 ufw allow 8080/tcp >/dev/null 2>&1 || true
+ufw allow 8081/tcp >/dev/null 2>&1 || true
 # Ativa UFW sem travar SSH se já estiver ativo
 ufw --force enable >/dev/null 2>&1 || true
-ok "Portas 22/80/443/8080 liberadas"
+ok "Portas 22/80/443/8080/8081 liberadas"
 
 log "📝 Preparando arquivo .env"
 if [[ ! -f .env ]]; then
@@ -107,8 +108,15 @@ if ! grep -qE '^DB_ROOT_PASSWORD=' .env; then
   ok "DB_ROOT_PASSWORD gerado"
 fi
 
-grep -qE '^APP_PORT=' .env || echo "APP_PORT=80" >> .env
+grep -qE '^APP_PORT=' .env || echo "APP_PORT=8081" >> .env
 grep -qE '^PHPMYADMIN_PORT=' .env || echo "PHPMYADMIN_PORT=8080" >> .env
+
+# Se APP_PORT ainda for 80 (conflito com Traefik), migra para 8081
+CURRENT_APP_PORT="$(grep -E '^APP_PORT=' .env | cut -d= -f2- || true)"
+if [[ "$CURRENT_APP_PORT" == "80" ]]; then
+  set_env "APP_PORT" "8081"
+  ok "APP_PORT alterado de 80 para 8081 (Traefik na 80)"
+fi
 
 log "📁 Criando diretórios de storage e permissões"
 mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache
@@ -144,6 +152,7 @@ log "📊 Status dos containers"
 docker compose ps
 
 PMA_PORT_MSG="$(grep -E '^PHPMYADMIN_PORT=' .env | cut -d= -f2- || echo 8080)"
+APP_PORT_MSG="$(grep -E '^APP_PORT=' .env | cut -d= -f2- || echo 8081)"
 HOST_IP="$(hostname -I | awk '{print $1}')"
 
 cat <<EOF
@@ -152,11 +161,12 @@ cat <<EOF
 🎉 Setup da VPS concluído!
 
 📌 Próximos passos:
-  1. Edite o .env e ajuste APP_URL, e-mail, etc.
+  1. Edite o .env e ajuste APP_URL (ex.: http://${HOST_IP}:${APP_PORT_MSG}), e-mail, etc.
   2. Faça logout/login (ou: newgrp docker) para usar docker sem sudo
   3. Para novos deploys:  bash scripts/deploy.sh
+  4. Porta 80 fica livre para o Traefik; o nginx do app usa ${APP_PORT_MSG}
 
-🌐 Aplicação:   http://${HOST_IP}
+🌐 Aplicação:   http://${HOST_IP}:${APP_PORT_MSG}
 🗄️  phpMyAdmin:  http://${HOST_IP}:${PMA_PORT_MSG}
 📄 Arquivo de ambiente: ${APP_DIR}/.env
 ============================================================
