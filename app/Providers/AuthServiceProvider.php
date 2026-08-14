@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use Illuminate\Contracts\Auth\Access\Gate as GateContract;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Schema;
 use App\User;
 use App\Permission;
+
 class AuthServiceProvider extends ServiceProvider
 {
     /**
@@ -26,13 +28,20 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies($gate);
 
+        // Evita falha no package:discover / primeiro boot antes das migrations
+        try {
+            if (!Schema::hasTable('permissions')) {
+                return;
+            }
+        } catch (\Exception $e) {
+            return;
+        }
+
         $permissions = Permission::with('roles')->get();
         foreach ($permissions as $permission) {
-            
-            $gate->define($permission->name,function(User $user) use ($permission){
+            $gate->define($permission->name, function (User $user) use ($permission) {
                 return $user->hasPermission($permission);
             });
-        
         }
     }
 }
