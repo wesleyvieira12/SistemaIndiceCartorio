@@ -95,24 +95,55 @@ cd SistemaIndiceCartorio
 
 ## 6. Porta da aplicação e Traefik
 
-O `indice_nginx` publica na porta **8081** do host (`APP_PORT=8081`), para a **80** ficar livre ao **Traefik**.
+O `indice_nginx` publica na **8081** (acesso direto) e também se conecta à rede do **Traefik** para o domínio público.
 
-No `.env`:
+### DNS (Hostinger)
 
-```env
-APP_PORT=8081
-APP_URL=http://IP_DA_VPS:8081
-```
+Hoje [1serventiaimoveisoeiras.com.br](https://1serventiaimoveisoeiras.com.br) ainda aparece como domínio estacionado na Hostinger. Crie/aponta o registro:
 
-Acesso direto (sem Traefik): `http://IP_DA_VPS:8081`
+| Tipo | Nome | Valor |
+|------|------|--------|
+| A    | `@`  | `IP_DA_VPS` (ex.: `187.127.49.235`) |
+| A    | `www`| mesmo IP (opcional) |
 
-Se o Traefik já estiver na 80, **não** precisa pará-lo. Confira:
+Remova parking/página da Hostinger se estiver ativa. Aguarde a propagação DNS.
+
+### Descobrir a rede do Traefik
 
 ```bash
-sudo ss -tlnp | grep -E ':80 |:8081 |:8080 '
+docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Ports}}' | grep -i traefik
+docker network ls
+docker inspect $(docker ps -qf name=traefik) --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
 ```
 
-Só libere a **8081** se estiver ocupada por outro serviço. Apache/nginx do sistema na 80 podem permanecer se o Traefik for o proxy desejado — ou pare-os se forem redundantes.
+Use o nome da rede no `.env` (`TRAEFIK_NETWORK=...`).
+
+### Variáveis no `.env`
+
+```env
+APP_URL=https://1serventiaimoveisoeiras.com.br
+APP_PORT=8081
+
+TRAEFIK_ENABLE=true
+TRAEFIK_NETWORK=traefik
+TRAEFIK_HOST=1serventiaimoveisoeiras.com.br
+TRAEFIK_ENTRYPOINT=web
+TRAEFIK_ENTRYPOINT_HTTPS=websecure
+TRAEFIK_CERTRESOLVER=letsencrypt
+```
+
+Se o certresolver ou entrypoints tiverem outro nome no seu Traefik, ajuste `TRAEFIK_CERTRESOLVER` / `TRAEFIK_ENTRYPOINT*`.
+
+### Subir com a rede do Traefik
+
+```bash
+docker compose up -d
+docker compose exec -T app php artisan config:cache
+docker compose restart app
+```
+
+- Domínio: `https://1serventiaimoveisoeiras.com.br`
+- Direto (sem Traefik): `http://IP:8081`
 
 ---
 
