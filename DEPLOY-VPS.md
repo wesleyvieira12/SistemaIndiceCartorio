@@ -299,7 +299,7 @@ Atalho sem rebuild (só para destravar agora):
 ```bash
 docker compose exec -T app composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts
 echo '<?php return [];' > bootstrap/cache/packages.php
-docker compose exec -T app npm ci --legacy-peer-deps || docker compose exec -T app npm install --legacy-peer-deps
+docker compose exec -T app npm install --legacy-peer-deps
 docker compose exec -T app npm run production
 docker compose exec -T app php artisan key:generate --force
 docker compose exec -T app php artisan storage:link || true

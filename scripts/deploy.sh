@@ -76,8 +76,8 @@ log "Dependências PHP (Composer)"
 docker compose exec -T app composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 
 log "Assets frontend (npm)"
-# package-lock antigo pode estar dessincronizado; cai para npm install se npm ci falhar
-docker compose exec -T app bash -lc 'npm ci --legacy-peer-deps || npm install --legacy-peer-deps'
+# package-lock antigo (npm 5/6) quebra npm ci no Node 16 — usar install
+docker compose exec -T app npm install --legacy-peer-deps
 docker compose exec -T app npm run production
 
 log "Laravel: storage link, migrate e caches"

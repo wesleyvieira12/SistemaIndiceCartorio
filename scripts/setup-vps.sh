@@ -130,7 +130,7 @@ if ! grep -qE '^APP_KEY=base64:' .env; then
   ok "APP_KEY gerado"
 fi
 
-docker compose exec -T app npm ci --legacy-peer-deps || docker compose exec -T app npm install --legacy-peer-deps
+docker compose exec -T app npm install --legacy-peer-deps
 docker compose exec -T app npm run production
 docker compose exec -T app php artisan storage:link || true
 docker compose exec -T app php artisan migrate --force
