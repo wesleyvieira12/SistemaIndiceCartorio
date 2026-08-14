@@ -105,6 +105,7 @@ Aponte o domínio para a VPS (senão o HTTPS não emite certificado):
 |------|------|--------|
 | A    | `@`  | `IP_DA_VPS` |
 | A    | `www`| mesmo IP (opcional) |
+| A    | `phpmyadmin` | mesmo IP |
 
 Remova a página de “parked domain” da Hostinger, se estiver ativa.
 
@@ -116,6 +117,7 @@ APP_PORT=8081
 
 TRAEFIK_ENABLE=true
 TRAEFIK_HOST=1serventiaimoveisoeiras.com.br
+TRAEFIK_PHPMYADMIN_HOST=phpmyadmin.1serventiaimoveisoeiras.com.br
 TRAEFIK_ACME_EMAIL=seu-email@dominio.com.br
 ```
 
@@ -132,9 +134,10 @@ docker compose exec -T app php artisan config:cache
 docker compose restart app
 ```
 
-- Público: `https://1serventiaimoveisoeiras.com.br`
-- Direto: `http://IP:8081`
-
+- App: `https://1serventiaimoveisoeiras.com.br`
+- phpMyAdmin: `https://phpmyadmin.1serventiaimoveisoeiras.com.br`
+- Direto app: `http://IP:8081`
+- Direto phpMyAdmin: `http://IP:8080`
 ---
 
 ## 7. Rodar o setup (única vez)
