@@ -40,7 +40,41 @@ sudo apt install -y git
 
 ---
 
-## 4. Clonar o projeto
+## 4. Adicionar chave SSH no GitHub
+
+Necessário se o repositório for privado (ou se preferir clonar via SSH).
+
+Na VPS, gere uma chave (se ainda não tiver):
+
+```bash
+ssh-keygen -t ed25519 -C "vps-deploy" -f ~/.ssh/id_ed25519 -N ""
+```
+
+Mostre a chave **pública** e copie o conteúdo:
+
+```bash
+cat ~/.ssh/id_ed25519.pub
+```
+
+No GitHub:
+
+1. Abra **Settings** → **SSH and GPG keys** → **New SSH key**  
+   (ou, para acesso só a este repositório: **Settings** do repo → **Deploy keys** → **Add deploy key**)
+2. Título: ex. `VPS deploy`
+3. Cole o conteúdo de `id_ed25519.pub`
+4. Salve
+
+Teste a conexão:
+
+```bash
+ssh -T git@github.com
+```
+
+Deve aparecer algo como: `Hi SEU_USUARIO! You've successfully authenticated...`
+
+---
+
+## 5. Clonar o projeto
 
 Escolha um diretório (exemplo: `/var/www`):
 
@@ -48,15 +82,55 @@ Escolha um diretório (exemplo: `/var/www`):
 sudo mkdir -p /var/www
 sudo chown "$USER":"$USER" /var/www
 cd /var/www
-git clone URL_DO_SEU_REPOSITORIO SistemaIndiceCartorio
+git clone git@github.com:SEU_USUARIO/SistemaIndiceCartorio.git SistemaIndiceCartorio
 cd SistemaIndiceCartorio
 ```
 
-> Troque `URL_DO_SEU_REPOSITORIO` pela URL real do Git.
+> Troque `SEU_USUARIO` pelo usuário/organização do GitHub.  
+> Se preferir HTTPS: `git clone https://github.com/SEU_USUARIO/SistemaIndiceCartorio.git`
 
 ---
 
-## 5. Rodar o setup (única vez)
+## 6. Liberar a porta 80 (e 8080, se ocupada)
+
+O container `indice_nginx` usa a porta **80** do host. Se outro programa já estiver nela, o Docker falha com `address already in use`.
+
+Verifique o que está usando:
+
+```bash
+sudo ss -tlnp | grep -E ':80 |:8080 '
+```
+
+Em VPS Ubuntu, costuma ser **Apache** ou **nginx** do sistema. Pare e desabilite:
+
+```bash
+# Apache
+sudo systemctl stop apache2
+sudo systemctl disable apache2
+
+# nginx do host (não o container Docker)
+sudo systemctl stop nginx
+sudo systemctl disable nginx
+```
+
+Confirme que a porta ficou livre:
+
+```bash
+sudo ss -tlnp | grep -E ':80 |:8080 '
+```
+
+(não deve listar nada, ou só processos que você realmente quer manter)
+
+Opcional — remover de vez (só se não precisar mais desses serviços):
+
+```bash
+sudo apt remove -y apache2 nginx
+sudo apt autoremove -y
+```
+
+---
+
+## 7. Rodar o setup (única vez)
 
 Este script instala Docker, Docker Compose, configura o firewall, cria o `.env`, sobe os containers e faz o primeiro deploy:
 
@@ -81,7 +155,7 @@ newgrp docker
 
 ---
 
-## 6. Ajustar o `.env`
+## 8. Ajustar o `.env`
 
 ```bash
 nano .env
@@ -117,7 +191,7 @@ docker compose exec -T app php artisan config:cache
 
 ---
 
-## 7. Conferir se está no ar
+## 9. Conferir se está no ar
 
 ```bash
 docker compose ps
@@ -136,7 +210,7 @@ No phpMyAdmin, entre com:
 
 ---
 
-## 8. Deploys seguintes (atualizações)
+## 10. Deploys seguintes (atualizações)
 
 Sempre que houver mudança no código:
 
@@ -183,7 +257,14 @@ docker compose exec app php artisan ...
 
 ## Problemas comuns
 
-### Porta 80 ou 8080 não abre
+### `address already in use` na porta 80
+Algo no host já usa a porta (Apache/nginx, etc.). Veja a [seção 6](#6-liberar-a-porta-80-e-8080-se-ocupada), liberte a porta e rode de novo:
+
+```bash
+docker compose up -d
+```
+
+### Porta 80 ou 8080 não abre no navegador
 - Libere no **firewall do provedor** (além do UFW da VPS).
 - Confira: `sudo ufw status`
 
@@ -203,6 +284,30 @@ docker compose exec app chmod -R ug+rwx storage bootstrap/cache
 - Confirme `DB_HOST=db` no `.env`
 - Confirme que o MySQL está healthy: `docker compose ps`
 
+### `Undefined index: name` no `package:discover`
+Laravel **5.5.32** não lê o `installed.json` do Composer 2. O `Dockerfile` usa Composer **1.10**.
+
+Na VPS, após atualizar o código:
+
+```bash
+git pull
+bash scripts/deploy.sh --no-pull
+```
+
+Atalho sem rebuild (só para destravar agora):
+
+```bash
+docker compose exec -T app composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts
+echo '<?php return [];' > bootstrap/cache/packages.php
+docker compose exec -T app npm ci --legacy-peer-deps || docker compose exec -T app npm install --legacy-peer-deps
+docker compose exec -T app npm run production
+docker compose exec -T app php artisan key:generate --force
+docker compose exec -T app php artisan storage:link || true
+docker compose exec -T app php artisan migrate --force
+docker compose exec -T app php artisan config:cache
+docker compose exec -T app php artisan route:cache
+```
+
 ---
 
 ## Resumo rápido
@@ -210,8 +315,13 @@ docker compose exec app chmod -R ug+rwx storage bootstrap/cache
 ```bash
 ssh usuario@IP_DA_VPS
 sudo apt update && sudo apt install -y git
-cd /var/www && git clone URL_DO_REPO SistemaIndiceCartorio
+ssh-keygen -t ed25519 -C "vps-deploy" -f ~/.ssh/id_ed25519 -N ""
+cat ~/.ssh/id_ed25519.pub   # cole no GitHub (SSH keys ou Deploy keys)
+ssh -T git@github.com
+cd /var/www && git clone git@github.com:SEU_USUARIO/SistemaIndiceCartorio.git SistemaIndiceCartorio
 cd SistemaIndiceCartorio
+sudo ss -tlnp | grep -E ':80 |:8080 '   # se ocupada, stop/disable apache2 ou nginx
+sudo systemctl stop apache2 nginx 2>/dev/null; sudo systemctl disable apache2 nginx 2>/dev/null
 sudo bash scripts/setup-vps.sh
 nano .env   # ajuste APP_URL
 docker compose exec -T app php artisan config:cache

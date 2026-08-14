@@ -22,7 +22,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+# Composer 1: Laravel 5.5 (< 5.5.49) quebra package:discover com Composer 2
+# (PackageManifest: Undefined index: name)
+COPY --from=composer:1.10 /usr/bin/composer /usr/bin/composer
 
 # Node 16 (compatível com laravel-mix 1.x deste projeto)
 RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
