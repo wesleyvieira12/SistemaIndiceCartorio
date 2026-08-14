@@ -166,13 +166,14 @@ cat <<EOF
 🎉 Setup da VPS concluído!
 
 📌 Próximos passos:
-  1. Edite o .env e ajuste APP_URL (ex.: http://${HOST_IP}:${APP_PORT_MSG}), e-mail, etc.
+  1. Edite o .env: APP_URL, TRAEFIK_HOST, TRAEFIK_ACME_EMAIL
   2. Faça logout/login (ou: newgrp docker) para usar docker sem sudo
   3. Para novos deploys:  bash scripts/deploy.sh
-  4. Porta 80 fica livre para o Traefik; o nginx do app usa ${APP_PORT_MSG}
+  4. Traefik escuta 80/443; nginx do app também em ${APP_PORT_MSG}
 
-🌐 Aplicação:   http://${HOST_IP}:${APP_PORT_MSG}
-🗄️  phpMyAdmin:  http://${HOST_IP}:${PMA_PORT_MSG}
+🌐 Domínio (Traefik): https://1serventiaimoveisoeiras.com.br
+🌐 Direto:           http://${HOST_IP}:${APP_PORT_MSG}
+🗄️  phpMyAdmin:       http://${HOST_IP}:${PMA_PORT_MSG}
 📄 Arquivo de ambiente: ${APP_DIR}/.env
 ============================================================
 EOF

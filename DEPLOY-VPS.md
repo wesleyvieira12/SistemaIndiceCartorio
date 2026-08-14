@@ -4,12 +4,12 @@ Guia para subir o **Sistema Índice Cartório** em uma VPS Ubuntu zerada, usando
 
 ## O que sobe
 
-| Serviço     | Porta padrão | URL                              |
-|-------------|--------------|----------------------------------|
-| Aplicação   | 8081         | `http://IP_DA_VPS:8081`          |
-| phpMyAdmin  | 8080         | `http://IP_DA_VPS:8080`          |
-| Traefik     | 80 / 443     | proxy reverso (se instalado)     |
-| MySQL       | 3306         | uso interno / opcional           |
+| Serviço     | Porta padrão | URL                                         |
+|-------------|--------------|---------------------------------------------|
+| Traefik     | 80 / 443     | `https://1serventiaimoveisoeiras.com.br`    |
+| Aplicação   | 8081         | `http://IP_DA_VPS:8081` (acesso direto)     |
+| phpMyAdmin  | 8080         | `http://IP_DA_VPS:8080`                     |
+| MySQL       | 3306         | uso interno / opcional                      |
 
 ---
 
@@ -93,30 +93,20 @@ cd SistemaIndiceCartorio
 
 ---
 
-## 6. Porta da aplicação e Traefik
+## 6. Traefik + domínio HTTPS
 
-O `indice_nginx` publica na **8081** (acesso direto) e também se conecta à rede do **Traefik** para o domínio público.
+O **Traefik** sobe junto no `docker-compose` (portas **80** e **443**), com Let's Encrypt. O nginx do app continua também na **8081** para acesso direto.
 
 ### DNS (Hostinger)
 
-Hoje [1serventiaimoveisoeiras.com.br](https://1serventiaimoveisoeiras.com.br) ainda aparece como domínio estacionado na Hostinger. Crie/aponta o registro:
+Aponte o domínio para a VPS (senão o HTTPS não emite certificado):
 
 | Tipo | Nome | Valor |
 |------|------|--------|
-| A    | `@`  | `IP_DA_VPS` (ex.: `187.127.49.235`) |
+| A    | `@`  | `IP_DA_VPS` |
 | A    | `www`| mesmo IP (opcional) |
 
-Remova parking/página da Hostinger se estiver ativa. Aguarde a propagação DNS.
-
-### Descobrir a rede do Traefik
-
-```bash
-docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Ports}}' | grep -i traefik
-docker network ls
-docker inspect $(docker ps -qf name=traefik) --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
-```
-
-Use o nome da rede no `.env` (`TRAEFIK_NETWORK=...`).
+Remova a página de “parked domain” da Hostinger, se estiver ativa.
 
 ### Variáveis no `.env`
 
@@ -125,25 +115,25 @@ APP_URL=https://1serventiaimoveisoeiras.com.br
 APP_PORT=8081
 
 TRAEFIK_ENABLE=true
-TRAEFIK_NETWORK=traefik
 TRAEFIK_HOST=1serventiaimoveisoeiras.com.br
-TRAEFIK_ENTRYPOINT=web
-TRAEFIK_ENTRYPOINT_HTTPS=websecure
-TRAEFIK_CERTRESOLVER=letsencrypt
+TRAEFIK_ACME_EMAIL=seu-email@dominio.com.br
 ```
 
-Se o certresolver ou entrypoints tiverem outro nome no seu Traefik, ajuste `TRAEFIK_CERTRESOLVER` / `TRAEFIK_ENTRYPOINT*`.
-
-### Subir com a rede do Traefik
+### Subir
 
 ```bash
+# garanta que não há outro processo nas portas 80/443
+sudo ss -tlnp | grep -E ':80 |:443 '
+
 docker compose up -d
+docker compose ps
+docker compose logs -f traefik   # veja se o certificado foi emitido
 docker compose exec -T app php artisan config:cache
 docker compose restart app
 ```
 
-- Domínio: `https://1serventiaimoveisoeiras.com.br`
-- Direto (sem Traefik): `http://IP:8081`
+- Público: `https://1serventiaimoveisoeiras.com.br`
+- Direto: `http://IP:8081`
 
 ---
 
@@ -345,4 +335,4 @@ nano .env   # APP_PORT=8081 e APP_URL=http://IP:8081
 docker compose exec -T app php artisan config:cache
 ```
 
-Pronto: app na porta **8081**, phpMyAdmin na **8080**, Traefik livre na **80**.
+Pronto: Traefik nas portas **80/443**, app direto na **8081**, phpMyAdmin na **8080**.
