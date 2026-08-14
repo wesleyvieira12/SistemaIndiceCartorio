@@ -68,8 +68,13 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=indice_traefik"
+      - "traefik.http.middlewares.indice-hsts.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.indice-hsts.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.indice-hsts.headers.stsPreload=true"
+      - "traefik.http.middlewares.indice-hsts.headers.forceSTSHeader=true"
       - "traefik.http.routers.indice.rule=Host(`1serventiaimoveisoeiras.com.br`) || Host(`www.1serventiaimoveisoeiras.com.br`)"
       - "traefik.http.routers.indice.entrypoints=websecure"
+      - "traefik.http.routers.indice.middlewares=indice-hsts"
       - "traefik.http.routers.indice.tls=true"
       - "traefik.http.routers.indice.tls.certresolver=letsencrypt"
       - "traefik.http.services.indice.loadbalancer.server.port=80"

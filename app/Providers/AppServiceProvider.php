@@ -17,8 +17,9 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
 
-        // Atrás do Traefik: gera links/assets sempre em https
-        if (strncmp(config('app.url'), 'https://', 8) === 0) {
+        // Sempre HTTPS em produção / quando APP_URL for https (atrás do Traefik)
+        if ($this->app->environment('production')
+            || strncmp((string) config('app.url'), 'https://', 8) === 0) {
             URL::forceScheme('https');
         }
     }

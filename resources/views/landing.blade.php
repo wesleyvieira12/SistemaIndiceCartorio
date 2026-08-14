@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/landing.css') }}">
+    <link rel="stylesheet" href="/css/landing.css">
 </head>
 <body>
     <header class="site-header">
@@ -17,7 +17,7 @@
         <nav class="site-nav" aria-label="Principal">
             <a href="#servicos">Serviços</a>
             <a href="#contato">Contato</a>
-            <a class="nav-cta" href="{{ route('login') }}">Acessar sistema</a>
+            <a class="nav-cta" href="/login">Acessar sistema</a>
         </nav>
     </header>
 
@@ -27,7 +27,7 @@
             <div class="hero-brand">
                 <img
                     class="hero-logo"
-                    src="{{ asset('img/logo-serventia.png') }}"
+                    src="/img/logo-serventia.png"
                     alt="1ª Serventia Extrajudicial de Oeiras – PI — Registro de Imóveis e Civil das Pessoas Naturais"
                 >
             </div>
@@ -37,7 +37,7 @@
                     Sistema de índices da serventia para gestão de protocolos e atendimento extrajudicial.
                 </p>
                 <div class="hero-actions">
-                    <a class="btn btn-gold" href="{{ route('login') }}">Entrar no sistema</a>
+                    <a class="btn btn-gold" href="/login">Entrar no sistema</a>
                     <a class="btn btn-ghost" href="#contato">Falar conosco</a>
                 </div>
             </div>

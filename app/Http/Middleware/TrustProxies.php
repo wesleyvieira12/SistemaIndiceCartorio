@@ -10,13 +10,12 @@ class TrustProxies extends Middleware
     /**
      * The trusted proxies for this application.
      *
-     * @var array
+     * @var array|string
      */
     protected $proxies = '*';
 
-
     /**
-     * The current proxy header mappings.
+     * The current proxy header mappings (fideloper/proxy ~3.x / Laravel 5.5).
      *
      * @var array
      */
