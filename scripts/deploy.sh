@@ -21,50 +21,50 @@ for arg in "$@"; do
       exit 0
       ;;
     *)
-      echo "Argumento desconhecido: $arg" >&2
+      echo "❌ Argumento desconhecido: $arg" >&2
       exit 1
       ;;
   esac
 done
 
-log() { echo -e "\n==> $*"; }
-ok()  { echo "✓ $*"; }
+log() { echo -e "\n🚀 ==> $*"; }
+ok()  { echo "✅ $*"; }
 
 if [[ ! -f docker-compose.yml ]]; then
-  echo "docker-compose.yml não encontrado em ${APP_DIR}" >&2
+  echo "❌ docker-compose.yml não encontrado em ${APP_DIR}" >&2
   exit 1
 fi
 
 if [[ ! -f .env ]]; then
-  echo ".env não encontrado. Rode antes: sudo bash scripts/setup-vps.sh" >&2
+  echo "❌ .env não encontrado. Rode antes: sudo bash scripts/setup-vps.sh" >&2
   exit 1
 fi
 
 if ! command -v docker >/dev/null 2>&1; then
-  echo "Docker não encontrado. Rode: sudo bash scripts/setup-vps.sh" >&2
+  echo "❌ Docker não encontrado. Rode: sudo bash scripts/setup-vps.sh" >&2
   exit 1
 fi
 
 if [[ "$DO_PULL" -eq 1 ]]; then
   if [[ -d .git ]]; then
-    log "Atualizando código (git pull)"
+    log "📥 Atualizando código (git pull)"
     git pull --ff-only
     ok "Código atualizado"
   else
-    echo "Aviso: diretório sem .git — pulando git pull"
+    echo "⚠️  Aviso: diretório sem .git — pulando git pull"
   fi
 fi
 
-log "Garantindo diretórios de storage"
+log "📁 Garantindo diretórios de storage"
 mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache
 
-log "Rebuild e restart dos containers"
+log "🏗️  Rebuild e restart dos containers"
 docker compose build
 docker compose up -d --remove-orphans
 ok "Containers no ar"
 
 # Espera o app responder
-log "Aguardando container app"
+log "⏳ Aguardando container app"
 for i in {1..30}; do
   if docker compose exec -T app php -v >/dev/null 2>&1; then
     break
@@ -72,15 +72,15 @@ for i in {1..30}; do
   sleep 1
 done
 
-log "Dependências PHP (Composer)"
+log "🐘 Dependências PHP (Composer)"
 docker compose exec -T app composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 
-log "Assets frontend (npm)"
+log "🎨 Assets frontend (npm)"
 # package-lock antigo (npm 5/6) quebra npm ci no Node 16 — usar install
 docker compose exec -T app npm install --legacy-peer-deps
 docker compose exec -T app npm run production
 
-log "Laravel: storage link, migrate e caches"
+log "⚙️  Laravel: storage link, migrate e caches"
 docker compose exec -T app php artisan storage:link || true
 docker compose exec -T app php artisan migrate --force
 
@@ -90,14 +90,14 @@ fi
 
 docker compose exec -T app php artisan config:cache
 docker compose exec -T app php artisan route:cache
-docker compose exec -T app php artisan view:cache || true
+# Laravel 5.5 não tem view:cache
 docker compose exec -T app php artisan queue:restart || true
 
-log "Ajustando permissões"
+log "🔐 Ajustando permissões"
 docker compose exec -T app chown -R www-data:www-data storage bootstrap/cache || true
 docker compose exec -T app chmod -R ug+rwx storage bootstrap/cache || true
 
-log "Status"
+log "📊 Status"
 docker compose ps
 
-ok "Deploy concluído em $(date '+%Y-%m-%d %H:%M:%S')"
+ok "🎉 Deploy concluído em $(date '+%Y-%m-%d %H:%M:%S')"

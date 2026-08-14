@@ -5,9 +5,9 @@ set -euo pipefail
 APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$APP_DIR"
 
-log()  { echo -e "\n==> $*"; }
-ok()   { echo "✓ $*"; }
-fail() { echo "✗ $*" >&2; exit 1; }
+log()  { echo -e "\n🚀 ==> $*"; }
+ok()   { echo "✅ $*"; }
+fail() { echo "❌ $*" >&2; exit 1; }
 
 if [[ "$(id -u)" -ne 0 ]]; then
   fail "Execute como root: sudo bash scripts/setup-vps.sh"
@@ -16,7 +16,7 @@ fi
 REAL_USER="${SUDO_USER:-$USER}"
 REAL_HOME="$(getent passwd "$REAL_USER" | cut -d: -f6)"
 
-log "Atualizando pacotes do sistema"
+log "📦 Atualizando pacotes do sistema"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
 apt-get install -y \
@@ -27,7 +27,7 @@ apt-get install -y \
   git \
   ufw
 
-log "Instalando Docker Engine"
+log "🐳 Instalando Docker Engine"
 if ! command -v docker >/dev/null 2>&1; then
   install -m 0755 -d /etc/apt/keyrings
   curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
@@ -54,10 +54,10 @@ if ! docker compose version >/dev/null 2>&1; then
 fi
 ok "Docker Compose: $(docker compose version --short)"
 
-log "Adicionando usuário ${REAL_USER} ao grupo docker"
+log "👤 Adicionando usuário ${REAL_USER} ao grupo docker"
 usermod -aG docker "$REAL_USER" || true
 
-log "Configurando firewall (UFW)"
+log "🔥 Configurando firewall (UFW)"
 ufw allow OpenSSH >/dev/null 2>&1 || true
 ufw allow 80/tcp >/dev/null 2>&1 || true
 ufw allow 443/tcp >/dev/null 2>&1 || true
@@ -66,7 +66,7 @@ ufw allow 8080/tcp >/dev/null 2>&1 || true
 ufw --force enable >/dev/null 2>&1 || true
 ok "Portas 22/80/443/8080 liberadas"
 
-log "Preparando arquivo .env"
+log "📝 Preparando arquivo .env"
 if [[ ! -f .env ]]; then
   if [[ -f .env.example ]]; then
     cp .env.example .env
@@ -110,16 +110,16 @@ fi
 grep -qE '^APP_PORT=' .env || echo "APP_PORT=80" >> .env
 grep -qE '^PHPMYADMIN_PORT=' .env || echo "PHPMYADMIN_PORT=8080" >> .env
 
-log "Criando diretórios de storage e permissões"
+log "📁 Criando diretórios de storage e permissões"
 mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache
 chown -R "${REAL_USER}:${REAL_USER}" storage bootstrap/cache || true
 chmod -R ug+rwx storage bootstrap/cache
 
-log "Build e subida inicial dos containers"
+log "🏗️  Build e subida inicial dos containers"
 docker compose build
 docker compose up -d
 
-log "Instalando dependências e aplicando migrations (primeiro deploy)"
+log "📦 Instalando dependências e aplicando migrations (primeiro deploy)"
 # Aguarda o PHP-FPM ficar pronto
 sleep 3
 docker compose exec -T app composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
@@ -136,11 +136,11 @@ docker compose exec -T app php artisan storage:link || true
 docker compose exec -T app php artisan migrate --force
 docker compose exec -T app php artisan config:cache
 docker compose exec -T app php artisan route:cache
-docker compose exec -T app php artisan view:cache || true
+# Laravel 5.5 não tem view:cache
 
 docker compose exec -T app chown -R www-data:www-data storage bootstrap/cache || true
 
-log "Status dos containers"
+log "📊 Status dos containers"
 docker compose ps
 
 PMA_PORT_MSG="$(grep -E '^PHPMYADMIN_PORT=' .env | cut -d= -f2- || echo 8080)"
@@ -149,15 +149,15 @@ HOST_IP="$(hostname -I | awk '{print $1}')"
 cat <<EOF
 
 ============================================================
-Setup da VPS concluído.
+🎉 Setup da VPS concluído!
 
-Próximos passos:
+📌 Próximos passos:
   1. Edite o .env e ajuste APP_URL, e-mail, etc.
   2. Faça logout/login (ou: newgrp docker) para usar docker sem sudo
   3. Para novos deploys:  bash scripts/deploy.sh
 
-Aplicação:   http://${HOST_IP}
-phpMyAdmin:  http://${HOST_IP}:${PMA_PORT_MSG}
-Arquivo de ambiente: ${APP_DIR}/.env
+🌐 Aplicação:   http://${HOST_IP}
+🗄️  phpMyAdmin:  http://${HOST_IP}:${PMA_PORT_MSG}
+📄 Arquivo de ambiente: ${APP_DIR}/.env
 ============================================================
 EOF
