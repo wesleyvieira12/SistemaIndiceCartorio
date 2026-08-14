@@ -76,7 +76,8 @@ log "Dependências PHP (Composer)"
 docker compose exec -T app composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 
 log "Assets frontend (npm)"
-docker compose exec -T app bash -lc 'if [[ -f package-lock.json ]]; then npm ci --legacy-peer-deps; else npm install --legacy-peer-deps; fi'
+# package-lock antigo pode estar dessincronizado; cai para npm install se npm ci falhar
+docker compose exec -T app bash -lc 'npm ci --legacy-peer-deps || npm install --legacy-peer-deps'
 docker compose exec -T app npm run production
 
 log "Laravel: storage link, migrate e caches"
