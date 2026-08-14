@@ -182,4 +182,15 @@ class UserController extends Controller
         	return redirect()->route('users.index')->with('message', 'Falha na exclusão!');  
         }
     }
+
+    /**
+     * Usuário autenticado via API (necessário para route:cache — sem Closure).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \App\User|null
+     */
+    public function apiUser(Request $request)
+    {
+        return $request->user();
+    }
 }
