@@ -85,15 +85,20 @@ return [
     |
     */
 
-    'dashboard_url' => '/',
+    'dashboard_url' => 'painel',
 
     'logout_url' => 'logout',
 
-    'logout_method' => null,
+    'logout_method' => 'POST',
 
     'login_url' => 'login',
 
-    'register_url' => 'register',
+    // Registro público desativado
+    'register_url' => null,
+
+    'password_reset_url' => 'password/reset',
+
+    'password_email_url' => 'password/email',
 
     /*
     |--------------------------------------------------------------------------
@@ -131,6 +136,12 @@ return [
             'url'         => 'logs',
             'icon'        => 'navicon',
             'can'         => 'view_log'
+        ],
+        [
+            'text'        => 'Alertas',
+            'url'         => 'emails-agendados',
+            'icon'        => 'envelope',
+            'can'         => 'manage_scheduled_emails'
         ],
 
     ],

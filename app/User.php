@@ -29,6 +29,16 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
+    /**
+     * Envia o e-mail de redefinição de senha (link + token).
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new \App\Notifications\ResetPasswordNotification($token));
+    }
 
     public function types($type = null){
         $types =[

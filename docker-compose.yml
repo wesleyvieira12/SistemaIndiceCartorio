@@ -49,6 +49,36 @@ services:
     networks:
       - indice_net
 
+  # Roda o agendador Laravel a cada minuto (e-mails agendados, etc.)
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: indice_scheduler
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+    depends_on:
+      db:
+        condition: service_healthy
+      app:
+        condition: service_started
+    networks:
+      - indice_net
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        while true; do
+          php artisan schedule:run --no-interaction
+          sleep 60
+        done
+
   nginx:
     image: nginx:1.25-alpine
     container_name: indice_nginx

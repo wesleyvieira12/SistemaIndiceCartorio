@@ -24,8 +24,8 @@
                 {!! csrf_field() !!}
 
                 <div class="form-group has-feedback {{ $errors->has('email') ? 'has-error' : '' }}">
-                    <input type="email" name="email" class="form-control" value="{{ $email or old('email') }}"
-                           placeholder="{{ trans('adminlte::adminlte.email') }}">
+                    <input type="email" name="email" class="form-control" value="{{ old('email') }}"
+                           placeholder="{{ trans('adminlte::adminlte.email') }}" required>
                     <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
                     @if ($errors->has('email'))
                         <span class="help-block">
@@ -37,6 +37,9 @@
                         class="btn btn-primary btn-block btn-flat"
                 >{{ trans('adminlte::adminlte.send_password_reset_link') }}</button>
             </form>
+            <div class="auth-links" style="margin-top: 15px;">
+                <a href="{{ url(config('adminlte.login_url', 'login')) }}">Voltar ao login</a>
+            </div>
         </div>
         <!-- /.login-box-body -->
     </div><!-- /.login-box -->

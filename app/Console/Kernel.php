@@ -14,6 +14,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         \App\Console\Commands\SendResendTestEmail::class,
+        \App\Console\Commands\SendScheduledEmails::class,
     ];
 
     /**
@@ -24,8 +25,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+        $schedule->command('emails:send-scheduled')->everyMinute()->withoutOverlapping();
     }
 
     /**

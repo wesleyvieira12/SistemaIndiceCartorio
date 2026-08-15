@@ -47,20 +47,16 @@
                             </label>
                         </div>
                     </div>
-                    <!-- /.col -->
                     <div class="col-xs-4">
                         <button type="submit"
                                 class="btn btn-primary btn-block btn-flat">{{ trans('adminlte::adminlte.sign_in') }}</button>
                     </div>
-                    <!-- /.col -->
                 </div>
             </form>
-            <!--<div class="auth-links">
-                <a href="{{ url(config('adminlte.password_reset_url', 'password/reset')) }}"
-                   class="text-center"
-                >{{ trans('adminlte::adminlte.i_forgot_my_password') }}</a>-->
-                <br>
-                
+            <div class="auth-links" style="margin-top: 15px;">
+                <a href="{{ url(config('adminlte.password_reset_url', 'password/reset')) }}">
+                    {{ trans('adminlte::adminlte.i_forgot_my_password') }}
+                </a>
             </div>
         </div>
         <!-- /.login-box-body -->
