@@ -95,13 +95,13 @@ a {
 
 .hero {
     position: relative;
-    min-height: 100vh;
+    min-height: auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: 7rem clamp(1.25rem, 4vw, 3.5rem) 4rem;
+    padding: 5.5rem clamp(1.25rem, 4vw, 3.5rem) 2.75rem;
     overflow: hidden;
     background:
         radial-gradient(ellipse at 50% 18%, rgba(201, 165, 74, 0.18), transparent 42%),
@@ -110,11 +110,11 @@ a {
 
 .hero-glow {
     position: absolute;
-    width: 55vmax;
-    height: 55vmax;
+    width: 42vmax;
+    height: 42vmax;
     border-radius: 50%;
     background: radial-gradient(circle, rgba(228, 201, 122, 0.12), transparent 68%);
-    top: 10%;
+    top: 8%;
     left: 50%;
     transform: translateX(-50%);
     pointer-events: none;
@@ -124,15 +124,15 @@ a {
 .hero-brand {
     position: relative;
     z-index: 1;
-    margin-bottom: 2rem;
+    margin-bottom: 1.15rem;
     animation: rise 0.85s ease-out both;
 }
 
 .hero-logo {
-    width: min(720px, 92vw);
+    width: min(480px, 86vw);
     height: auto;
     margin: 0 auto;
-    filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.35));
+    filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.35));
 }
 
 .hero-copy {
