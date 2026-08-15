@@ -221,6 +221,8 @@ docker compose build
 docker compose up -d --remove-orphans
 # Opcache do PHP-FPM: reinicia para carregar o código novo do git
 docker compose restart app
+# Recarrega nginx para não ficar com IP antigo do app (evita 502)
+docker compose restart nginx
 ok "Containers no ar"
 
 # Espera o app responder
