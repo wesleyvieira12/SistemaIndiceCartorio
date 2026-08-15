@@ -20,7 +20,9 @@
                 @endforeach
             </ul>
             <p><strong>Texto:</strong></p>
-            <pre style="white-space: pre-wrap;">{{ $email->body }}</pre>
+            <div class="well" style="background:#fff;">
+                {!! $email->body !!}
+            </div>
             @if($email->error_message)
                 <div class="alert alert-danger">{{ $email->error_message }}</div>
             @endif

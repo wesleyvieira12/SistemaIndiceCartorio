@@ -45,7 +45,10 @@ class SendScheduledEmails extends Command
                 $body = $email->body;
 
                 foreach ($recipients as $to) {
-                    Mail::raw($body, function ($message) use ($to, $subject) {
+                    Mail::send('emails.scheduled', [
+                        'body' => $body,
+                        'subject' => $subject,
+                    ], function ($message) use ($to, $subject) {
                         $message->to($to)->subject($subject);
                     });
                 }

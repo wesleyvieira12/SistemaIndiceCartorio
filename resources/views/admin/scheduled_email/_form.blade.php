@@ -11,7 +11,7 @@
 
 <div class="form-group {{ $errors->has('body') ? 'has-error' : '' }}">
     <label>Texto do e-mail</label>
-    <textarea name="body" class="form-control" rows="8" required>{{ old('body', $email->body) }}</textarea>
+    <textarea name="body" id="body-editor" class="form-control" rows="10" required>{{ old('body', $email->body) }}</textarea>
     @if($errors->has('body'))
         <span class="help-block">{{ $errors->first('body') }}</span>
     @endif

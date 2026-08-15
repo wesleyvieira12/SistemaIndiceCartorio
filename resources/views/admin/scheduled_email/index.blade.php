@@ -3,14 +3,14 @@
 @section('title', 'E-mails agendados')
 
 @section('content_header')
-    <h1>E-mails agendados</h1>
+    <h1>Alertas</h1>
 @stop
 
 @section('content')
     <div class="box">
         <div class="box-header with-border">
             <a href="{{ route('emails-agendados.create') }}" class="btn btn-success">
-                <i class="fa fa-plus"></i> Agendar e-mail
+                <i class="fa fa-plus"></i> Agendar alerta
             </a>
         </div>
         <div class="box-body">
