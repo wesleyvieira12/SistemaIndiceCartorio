@@ -222,7 +222,30 @@ No phpMyAdmin, entre com:
 
 ## 10. Deploys seguintes (atualizações)
 
-Sempre que houver mudança no código:
+### Do seu PC (recomendado)
+
+Uma vez:
+
+```bash
+cp scripts/deploy.env.example scripts/deploy.env
+# edite DEPLOY_REMOTE e DEPLOY_SSH_KEY
+```
+
+Depois, sempre:
+
+```bash
+./scripts/deploy.sh
+```
+
+Isso lê `scripts/deploy.env`, faz `git push` e na VPS roda pull + build + migrate.
+
+Teste a chave antes:
+
+```bash
+ssh -i ~/.ssh/id_rsa root@187.127.49.235 'cd /var/www/SistemaIndiceCartorio && git rev-parse --short HEAD'
+```
+
+### Direto na VPS
 
 ```bash
 cd /var/www/SistemaIndiceCartorio
