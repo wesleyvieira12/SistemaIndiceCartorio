@@ -35,4 +35,9 @@ return [
         'secret' => env('STRIPE_SECRET'),
     ],
 
+    'resend' => [
+        // Substitua re_xxxxxxxxx pela sua chave real em .env → RESEND_API_KEY
+        'key' => env('RESEND_API_KEY'),
+    ],
+
 ];
