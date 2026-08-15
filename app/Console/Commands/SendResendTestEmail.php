@@ -2,43 +2,46 @@
 
 namespace App\Console\Commands;
 
-use App\Services\ResendMail;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Mail;
 
 class SendResendTestEmail extends Command
 {
     protected $signature = 'resend:test
                             {--to=moderador2012.2@gmail.com : Destinatário}
-                            {--from=onboarding@resend.dev : Remetente (domínio verificado na Resend)}';
+                            {--from= : Remetente (padrão: MAIL_FROM_ADDRESS do .env)}';
 
-    protected $description = 'Envia um e-mail de teste via API da Resend';
+    protected $description = 'Envia e-mail de teste pelo Mail do Laravel (SMTP / Resend)';
 
     public function handle()
     {
         $to = $this->option('to');
-        $from = $this->option('from');
+        $fromAddress = $this->option('from') ?: config('mail.from.address');
+        $fromName = config('mail.from.name');
 
-        $this->info('Enviando e-mail de teste via Resend...');
+        $this->info('Enviando e-mail de teste via Mail do Laravel...');
+        $this->line('Driver: '.config('mail.driver'));
+        $this->line('Host: '.config('mail.host'));
+        $this->line('De: '.$fromAddress);
+        $this->line('Para: '.$to);
 
         try {
-            $resend = ResendMail::client(config('services.resend.key'));
-
-            $result = $resend->emails->send([
-                'from' => $from,
-                'to' => $to,
-                'subject' => 'Hello World',
-                'html' => '<p>Congrats on sending your <strong>first email</strong>!</p>',
-            ]);
+            Mail::send([], [], function ($message) use ($to, $fromAddress, $fromName) {
+                $message->to($to)
+                    ->from($fromAddress, $fromName)
+                    ->subject('Hello World')
+                    ->setBody(
+                        '<p>Congrats on sending your <strong>first email</strong>!</p>',
+                        'text/html'
+                    );
+            });
         } catch (\Exception $e) {
             $this->error('Falha ao enviar: '.$e->getMessage());
 
             return 1;
         }
 
-        $this->info('E-mail enviado.');
-        if (! empty($result['id'])) {
-            $this->line('ID Resend: '.$result['id']);
-        }
+        $this->info('E-mail enviado com sucesso.');
 
         return 0;
     }
