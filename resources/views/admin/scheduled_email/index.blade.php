@@ -15,6 +15,7 @@
         </div>
         <div class="box-body">
             @include('includes.alerts')
+            <div class="table-responsive">
             <table class="table table-bordered table-striped">
                 <thead>
                 <tr>
@@ -57,7 +58,7 @@
                                 <span class="label label-default">{{ $email->statusLabel() }}</span>
                             @endif
                         </td>
-                        <td>
+                        <td style="white-space:nowrap">
                             <a href="{{ route('emails-agendados.show', $email->id) }}" class="btn btn-xs btn-info" title="Ver">
                                 <i class="fa fa-eye"></i>
                             </a>
@@ -88,6 +89,7 @@
                 @endforelse
                 </tbody>
             </table>
+            </div>
             {{ $emails->links() }}
         </div>
     </div>

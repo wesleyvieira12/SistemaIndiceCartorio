@@ -26,6 +26,7 @@
             <!-- /.box-header -->
             <div class="box-body">
               @include('includes.alerts')
+              <div class="table-responsive">
               <table class="table table-bordered">
                 <tbody>
                 <tr>
@@ -44,6 +45,7 @@
                 @endforeach
                 
               </tbody></table>
+              </div>
             </div>
             <!-- /.box-body -->
             {{$users->links()}}

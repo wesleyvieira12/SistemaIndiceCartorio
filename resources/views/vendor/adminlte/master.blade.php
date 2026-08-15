@@ -40,6 +40,28 @@
 
     <!-- Google Font -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+    <style>
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        @media (max-width: 767px) {
+            .content-wrapper,
+            .right-side {
+                padding-left: 0;
+                padding-right: 0;
+            }
+            .box-header .form-inline .form-control {
+                width: 100%;
+                margin-bottom: 6px;
+            }
+            .box-header .form-inline .form-group {
+                display: block;
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body class="hold-transition @yield('body_class')">
 

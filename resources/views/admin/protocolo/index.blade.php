@@ -10,24 +10,20 @@
 
     <div class="box">
             <div class="box-header with-border">
-            <div class="col-lg-11">
-              <form class="form-inline" action="{{ route('protocolos.index')}}" method="get">
-		           <div class="form-group">
-			            <input type="text" name="pesquisa_nome" class="form-control">
-		        	 </div>
-		        	 <div class="form-group">
-		        		<button type="submit" class="btn btn-success"><i class="fa fa-search"></i> Pesquisar</button>
-		        	 </div>
+              <form class="form-inline" action="{{ route('protocolos.index')}}" method="get" style="display:inline-block;margin-right:8px;margin-bottom:8px">
+                   <div class="form-group">
+                        <input type="text" name="pesquisa_nome" class="form-control" placeholder="Pesquisar..." style="max-width:100%">
+                     </div>
+                     <div class="form-group">
+                        <button type="submit" class="btn btn-success"><i class="fa fa-search"></i> Pesquisar</button>
+                     </div>
               </form>
-             </div>
-	        	
-	        	<a href="{{ route('protocolos.create')}}" class="btn btn-success"> <i class="fa fa-plus"></i> Protocolo</a>
-	        	
-
+                <a href="{{ route('protocolos.create')}}" class="btn btn-success" style="margin-bottom:8px"> <i class="fa fa-plus"></i> Protocolo</a>
             </div>
             <!-- /.box-header -->
             <div class="box-body">
               @include('includes.alerts')
+              <div class="table-responsive">
               <table class="table table-bordered">
                 <tbody>
                 <tr>
@@ -51,24 +47,19 @@
                     <td>{{ $protocolo->folha }}</td>
                     <td>{{ $protocolo->anotacao }}</td>
                     <td>{{ $protocolo->tipo }}</td>
-                    <td>
-                    	<div class="col-lg-3">
-                    		<a href="{{ route('protocolos.edit',$protocolo->id) }}" class="btn btn-warning"> <i class="fa fa-edit"></i></a> 
-                    	</div>
-                    	<div class="col-lg-2">
-                    		<form method="post" name="myform" action="{{ route('protocolos.destroy',$protocolo->id) }}">
-			                {{csrf_field()}}
-			                <input name="_method" type="hidden" value="DELETE">
-			                <button type="button" class="btn btn-danger" onclick="pergunta()"><i class="fa fa-trash"></i></button>
-			            	</form>
-                    	</div>
-                    	
-                    	
+                    <td style="white-space:nowrap">
+                        <a href="{{ route('protocolos.edit',$protocolo->id) }}" class="btn btn-warning btn-sm"> <i class="fa fa-edit"></i></a>
+                        <form method="post" name="myform" action="{{ route('protocolos.destroy',$protocolo->id) }}" style="display:inline">
+                        {{csrf_field()}}
+                        <input name="_method" type="hidden" value="DELETE">
+                        <button type="button" class="btn btn-danger btn-sm" onclick="pergunta()"><i class="fa fa-trash"></i></button>
+                        </form>
                     </td>
                   </tr>
                 @endforeach
                 
               </tbody></table>
+              </div>
             </div>
             <!-- /.box-body -->
             @if(!isset($dataForm))

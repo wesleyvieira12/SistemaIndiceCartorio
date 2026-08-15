@@ -359,13 +359,51 @@ a {
 
 @media (max-width: 720px) {
     .site-header {
+        position: relative;
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
+        gap: 0.85rem;
+        padding: 1rem 1.15rem 0.85rem;
     }
 
     .site-nav {
         width: 100%;
         flex-wrap: wrap;
-        gap: 0.85rem 1rem;
+        justify-content: flex-start;
+        gap: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .nav-cta {
+        padding: 0.45rem 0.85rem;
+    }
+
+    .hero {
+        padding: 1.75rem 1.15rem 2.25rem;
+    }
+
+    .hero-brand {
+        margin-bottom: 1rem;
+        width: 100%;
+    }
+
+    .hero-logo {
+        width: 100%;
+        max-width: 100%;
+        max-height: none;
+        height: auto;
+    }
+
+    .hero h1 {
+        font-size: clamp(1.75rem, 8vw, 2.35rem);
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .hero-actions .btn {
+        width: 100%;
     }
 }
