@@ -14,7 +14,7 @@
         </div>
         <!-- /.login-logo -->
         <div class="login-box-body">
-            <p class="login-box-msg">{{ trans('adminlte::adminlte.password_reset_message') }}</p>
+            <p class="login-box-msg">{{ trans('adminlte::adminlte.password_reset_form_message') }}</p>
             <form action="{{ url(config('adminlte.password_reset_url', 'password/reset')) }}" method="post">
                 {!! csrf_field() !!}
 
