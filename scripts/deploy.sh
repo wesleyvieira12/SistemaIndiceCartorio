@@ -237,6 +237,9 @@ done
 log "🐘 Dependências PHP (Composer)"
 docker compose exec -T app composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 
+log "🩹 Patch egulias/email-validator (PHP 7.4)"
+docker compose exec -T app php /var/www/html/scripts/patch-email-validator.php
+
 log "🎨 Assets frontend (npm)"
 # --no-package-lock: não reescreve package-lock.json no servidor
 docker compose exec -T app npm install --no-package-lock --legacy-peer-deps
