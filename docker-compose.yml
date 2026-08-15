@@ -1,28 +1,33 @@
 services:
-  traefik:  
-    image: traefik:3.0  
-    command:  
-      - "--api=true"  
-      - "--api.insecure=false"  
-      - "--providers.docker=true"  
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-      - "--certificatesresolvers.myresolver.acme.email=1serventiaimoveisoeiras@gmail.com"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+  traefik:
+    image: traefik:v2.11
+    container_name: indice_traefik
+    restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080"
     volumes:
-      - ./letsencrypt:/letsencrypt  
-      - /var/run/docker.sock:/var/run/docker.sock
-  whoami:  
-    image: traefik/whoami  
-    labels:  
-      - "traefik.http.routers.whoami.rule=Host(`whoami.1serventiaimoveisoeiras.com.br`)"
-      - "traefik.http.routers.whoami.entrypoints=websecure"
-      - "traefik.http.routers.whoami.tls.certresolver=myresolver"
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_letsencrypt:/letsencrypt
+    command:
+      - --log.level=INFO
+      - --accesslog=true
+      - --api.dashboard=false
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=indice_traefik
+      - --providers.docker.watch=true
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.web.http.redirections.entrypoint.permanent=true
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.letsencrypt.acme.email=${TRAEFIK_ACME_EMAIL:-1serventiaimoveisoeiras@gmail.com}
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+    networks:
+      - traefik
 
   app:
     build:
