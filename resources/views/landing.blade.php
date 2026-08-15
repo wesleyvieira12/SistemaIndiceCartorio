@@ -6,10 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="1ª Serventia Extrajudicial de Oeiras – PI. Registro de Imóveis e Civil das Pessoas Naturais. Sistema de índices cartorários.">
     <title>1ª Serventia Extrajudicial de Oeiras – PI</title>
+    <link rel="icon" href="/favicon.ico?v=2" sizes="any">
+    <link rel="icon" type="image/png" href="/favicon-32.png?v=2" sizes="32x32">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/landing.css">
+    <link rel="stylesheet" href="/css/landing.css?v=2">
 </head>
 <body>
     <header class="site-header">
@@ -27,7 +30,7 @@
             <div class="hero-brand">
                 <img
                     class="hero-logo"
-                    src="/img/logo-serventia.png"
+                    src="/img/logo-serventia.png?v=2"
                     alt="1ª Serventia Extrajudicial de Oeiras – PI — Registro de Imóveis e Civil das Pessoas Naturais"
                 >
             </div>
