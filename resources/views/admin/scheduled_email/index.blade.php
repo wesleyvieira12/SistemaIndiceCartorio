@@ -20,7 +20,8 @@
                 <tr>
                     <th style="width: 50px">#</th>
                     <th>Título</th>
-                    <th>Agendado para</th>
+                    <th>Próximo envio</th>
+                    <th>Último envio</th>
                     <th>Repetir</th>
                     <th>Destinatários</th>
                     <th>Status</th>
@@ -29,10 +30,22 @@
                 </thead>
                 <tbody>
                 @forelse($emails as $email)
+                    @php
+                        $lastSend = $email->last_sent_at ?: $email->sent_at;
+                    @endphp
                     <tr>
                         <td>{{ $email->id }}</td>
                         <td>{{ $email->subject }}</td>
-                        <td>{{ $email->scheduled_at ? $email->scheduled_at->format('d/m/Y H:i') : '-' }}</td>
+                        <td>
+                            @if($email->status === 'pending' && $email->scheduled_at)
+                                {{ $email->scheduled_at->format('d/m/Y H:i') }}
+                            @elseif($email->status === 'pending')
+                                —
+                            @else
+                                —
+                            @endif
+                        </td>
+                        <td>{{ $lastSend ? $lastSend->format('d/m/Y H:i') : '—' }}</td>
                         <td>{{ $email->repeatLabel() }}</td>
                         <td>{{ count($email->recipientList()) }}</td>
                         <td>
@@ -72,7 +85,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7">Nenhum alerta agendado.</td>
+                        <td colspan="8">Nenhum alerta agendado.</td>
                     </tr>
                 @endforelse
                 </tbody>

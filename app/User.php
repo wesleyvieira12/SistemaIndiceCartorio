@@ -30,14 +30,14 @@ class User extends Authenticatable
     ];
 
     /**
-     * Envia o e-mail de redefinição de senha (link + token).
+     * Mantido por compatibilidade; o fluxo atual usa código via PasswordResetController.
      *
      * @param  string  $token
      * @return void
      */
     public function sendPasswordResetNotification($token)
     {
-        $this->notify(new \App\Notifications\ResetPasswordNotification($token));
+        $this->notify(new \App\Notifications\ResetPasswordCodeNotification($token));
     }
 
     public function types($type = null){

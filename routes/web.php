@@ -25,8 +25,10 @@ Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
 Route::post('login', 'Auth\LoginController@login');
 Route::post('logout', 'Auth\LoginController@logout')->name('logout');
 
-// Recuperação de senha
-Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
-Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
-Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
-Route::post('password/reset', 'Auth\ResetPasswordController@reset');
+// Recuperação de senha por código
+Route::get('password/reset', 'Auth\PasswordResetController@showEmailForm')->name('password.request');
+Route::post('password/email', 'Auth\PasswordResetController@sendCode')->name('password.email');
+Route::get('password/codigo', 'Auth\PasswordResetController@showCodeForm')->name('password.code.form');
+Route::post('password/codigo', 'Auth\PasswordResetController@verifyCode')->name('password.code.verify');
+Route::get('password/nova-senha', 'Auth\PasswordResetController@showNewPasswordForm')->name('password.new.form');
+Route::post('password/nova-senha', 'Auth\PasswordResetController@updatePassword')->name('password.new.update');

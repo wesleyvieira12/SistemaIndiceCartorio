@@ -16,6 +16,9 @@
         <!-- /.login-logo -->
         <div class="login-box-body">
             <p class="login-box-msg">{{ trans('adminlte::adminlte.login_message') }}</p>
+            @if (session('status'))
+                <div class="alert alert-success">{{ session('status') }}</div>
+            @endif
             <form action="{{ url(config('adminlte.login_url', 'login')) }}" method="post">
                 {!! csrf_field() !!}
 

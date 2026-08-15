@@ -35,16 +35,7 @@ class ResetPasswordNotification extends Notification
      */
     public function toMail($notifiable)
     {
-        $email = method_exists($notifiable, 'getEmailForPasswordReset')
-            ? $notifiable->getEmailForPasswordReset()
-            : $notifiable->email;
-
         $resetUrl = url(route('password.reset', $this->token, false));
-        if (! empty($email)) {
-            $resetUrl .= (strpos($resetUrl, '?') === false ? '?' : '&').http_build_query([
-                'email' => $email,
-            ]);
-        }
 
         return (new MailMessage)
             ->subject('Recuperação de senha — 1ª Serventia Extrajudicial de Oeiras')

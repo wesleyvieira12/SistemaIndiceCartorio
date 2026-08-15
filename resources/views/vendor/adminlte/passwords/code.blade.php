@@ -12,7 +12,7 @@
             <a href="{{ url(config('adminlte.dashboard_url', 'painel')) }}">{!! config('adminlte.logo', '<b>Admin</b>LTE') !!}</a>
         </div>
         <div class="login-box-body">
-            <p class="login-box-msg">Informe seu e-mail para receber o código de redefinição</p>
+            <p class="login-box-msg">Digite o código enviado ao seu e-mail</p>
 
             @if (session('status'))
                 <div class="alert alert-success">{{ session('status') }}</div>
@@ -26,22 +26,30 @@
                 </div>
             @endif
 
-            <form action="{{ route('password.email') }}" method="post">
+            <form action="{{ route('password.code.verify') }}" method="post">
                 {!! csrf_field() !!}
 
                 <div class="form-group has-feedback {{ $errors->has('email') ? 'has-error' : '' }}">
-                    <input type="email" name="email" class="form-control" value="{{ old('email') }}"
+                    <input type="email" name="email" class="form-control"
+                           value="{{ old('email', isset($email) ? $email : '') }}"
                            placeholder="Email" required>
                     <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
                 </div>
 
+                <div class="form-group has-feedback {{ $errors->has('code') ? 'has-error' : '' }}">
+                    <input type="text" name="code" class="form-control" inputmode="numeric"
+                           autocomplete="one-time-code" maxlength="12"
+                           placeholder="Código de 6 dígitos" required>
+                    <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+                </div>
+
                 <button type="submit" class="btn btn-primary btn-block btn-flat">
-                    Enviar código
+                    Verificar código
                 </button>
             </form>
 
             <div class="auth-links" style="margin-top: 15px;">
-                <a href="{{ route('password.code.form') }}">Já tenho o código</a>
+                <a href="{{ route('password.request') }}">Reenviar código</a>
                 <br>
                 <a href="{{ url(config('adminlte.login_url', 'login')) }}">Voltar ao login</a>
             </div>
