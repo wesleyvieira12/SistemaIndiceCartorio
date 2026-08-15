@@ -8,7 +8,7 @@ Guia para subir o **Sistema Índice Cartório** em uma VPS Ubuntu zerada, usando
 |-------------|--------------|---------------------------------------------|
 | Traefik     | 80 / 443     | `https://1serventiaimoveisoeiras.com.br`    |
 | Aplicação   | 8081         | `http://IP_DA_VPS:8081` (acesso direto)     |
-| phpMyAdmin  | 8080         | `http://IP_DA_VPS:8080`                     |
+| phpMyAdmin  | 8082         | `http://IP_DA_VPS:8082`                     |
 | MySQL       | 3306         | uso interno / opcional                      |
 
 ---
@@ -18,7 +18,7 @@ Guia para subir o **Sistema Índice Cartório** em uma VPS Ubuntu zerada, usando
 - VPS Ubuntu 20.04 / 22.04 / 24.04
 - Acesso SSH com usuário que possa usar `sudo`
 - Repositório Git do projeto (GitHub/GitLab/etc.)
-- Portas **22**, **80**, **443**, **8080** e **8081** liberadas no painel do provedor (security group / firewall)
+- Portas **22**, **80**, **443**, **8081** e **8082** liberadas no painel do provedor (security group / firewall)
 - A app usa **8081** para não conflitar com o **Traefik** na porta 80
 
 ---
@@ -129,7 +129,7 @@ sudo ss -tlnp | grep -E ':80 |:443 '
 
 docker compose up -d
 docker compose ps
-docker compose logs -f traefik   # veja se o certificado foi emitido
+docker compose logs -f traefik-proxy   # veja se o certificado foi emitido
 docker compose exec -T app php artisan config:cache
 docker compose restart app
 ```
@@ -137,7 +137,7 @@ docker compose restart app
 - App: `https://1serventiaimoveisoeiras.com.br`
 - phpMyAdmin: `https://phpmyadmin.1serventiaimoveisoeiras.com.br`
 - Direto app: `http://IP:8081`
-- Direto phpMyAdmin: `http://IP:8080`
+- Direto phpMyAdmin: `http://IP:8082`
 ---
 
 ## 7. Rodar o setup (única vez)
@@ -188,7 +188,7 @@ DB_PASSWORD=...          # gerado no setup (não apague sem necessidade)
 DB_ROOT_PASSWORD=...     # gerado no setup
 
 APP_PORT=8081
-PHPMYADMIN_PORT=8080
+PHPMYADMIN_PORT=8082
 ```
 
 Salve (`Ctrl+O`, Enter) e saia (`Ctrl+X`).
@@ -212,7 +212,7 @@ Os containers `indice_app`, `indice_nginx`, `indice_db` e `indice_phpmyadmin` de
 Teste no navegador:
 
 - App: `http://IP_DA_VPS:8081`
-- phpMyAdmin: `http://IP_DA_VPS:8080`
+- phpMyAdmin: `http://IP_DA_VPS:8082`
 
 No phpMyAdmin, entre com:
 - usuário: valor de `DB_USERNAME` (ou `root`)
@@ -277,7 +277,7 @@ docker compose up -d
 
 A porta **80** pode continuar com o Traefik — o nginx do projeto não usa mais a 80.
 
-### Porta 8081 ou 8080 não abre no navegador
+### Porta 8081 ou 8082 não abre no navegador
 - Libere no **firewall do provedor** (além do UFW da VPS).
 - Confira: `sudo ufw status`
 
@@ -338,4 +338,4 @@ nano .env   # APP_PORT=8081 e APP_URL=http://IP:8081
 docker compose exec -T app php artisan config:cache
 ```
 
-Pronto: Traefik nas portas **80/443**, app direto na **8081**, phpMyAdmin na **8080**.
+Pronto: Traefik (`traefik-proxy`) nas portas **80/443**, app direto na **8081**, phpMyAdmin na **8082**.

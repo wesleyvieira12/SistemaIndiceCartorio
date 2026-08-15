@@ -1,7 +1,7 @@
 services:
-  traefik:
+  traefik-proxy:
     image: traefik:v2.11
-    container_name: indice_traefik
+    container_name: traefik-proxy
     restart: unless-stopped
     ports:
       - "80:80"
@@ -15,7 +15,7 @@ services:
       - --api.dashboard=false
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
-      - --providers.docker.network=indice_traefik
+      - --providers.docker.network=traefik-proxy
       - --providers.docker.watch=true
       - --entrypoints.web.address=:80
       - --entrypoints.web.http.redirections.entrypoint.to=websecure
@@ -27,7 +27,7 @@ services:
       - --certificatesresolvers.letsencrypt.acme.email=${TRAEFIK_ACME_EMAIL:-1serventiaimoveisoeiras@gmail.com}
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
     networks:
-      - traefik
+      - traefik-proxy
 
   app:
     build:
@@ -61,13 +61,13 @@ services:
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - app
-      - traefik
+      - traefik-proxy
     networks:
       - indice_net
-      - traefik
+      - traefik-proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=indice_traefik"
+      - "traefik.docker.network=traefik-proxy"
       - "traefik.http.middlewares.indice-hsts.headers.stsSeconds=31536000"
       - "traefik.http.middlewares.indice-hsts.headers.stsIncludeSubdomains=true"
       - "traefik.http.middlewares.indice-hsts.headers.stsPreload=true"
@@ -116,14 +116,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      traefik:
+      traefik-proxy:
         condition: service_started
     networks:
       - indice_net
-      - traefik
+      - traefik-proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=indice_traefik"
+      - "traefik.docker.network=traefik-proxy"
       - "traefik.http.routers.pma.rule=Host(`phpmyadmin.1serventiaimoveisoeiras.com.br`)"
       - "traefik.http.routers.pma.entrypoints=websecure"
       - "traefik.http.routers.pma.tls=true"
@@ -138,6 +138,6 @@ volumes:
 networks:
   indice_net:
     driver: bridge
-  traefik:
-    name: indice_traefik
+  traefik-proxy:
+    name: traefik-proxy
     driver: bridge

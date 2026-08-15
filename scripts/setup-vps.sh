@@ -61,11 +61,11 @@ log "🔥 Configurando firewall (UFW)"
 ufw allow OpenSSH >/dev/null 2>&1 || true
 ufw allow 80/tcp >/dev/null 2>&1 || true
 ufw allow 443/tcp >/dev/null 2>&1 || true
-ufw allow 8080/tcp >/dev/null 2>&1 || true
+ufw allow 8082/tcp >/dev/null 2>&1 || true
 ufw allow 8081/tcp >/dev/null 2>&1 || true
 # Ativa UFW sem travar SSH se já estiver ativo
 ufw --force enable >/dev/null 2>&1 || true
-ok "Portas 22/80/443/8080/8081 liberadas"
+ok "Portas 22/80/443/8081/8082 liberadas"
 
 log "📝 Preparando arquivo .env"
 if [[ ! -f .env ]]; then
@@ -109,7 +109,7 @@ if ! grep -qE '^DB_ROOT_PASSWORD=' .env; then
 fi
 
 grep -qE '^APP_PORT=' .env || echo "APP_PORT=8081" >> .env
-grep -qE '^PHPMYADMIN_PORT=' .env || echo "PHPMYADMIN_PORT=8080" >> .env
+grep -qE '^PHPMYADMIN_PORT=' .env || echo "PHPMYADMIN_PORT=8082" >> .env
 
 # Se APP_PORT ainda for 80 (conflito com Traefik), migra para 8081
 CURRENT_APP_PORT="$(grep -E '^APP_PORT=' .env | cut -d= -f2- || true)"
@@ -156,7 +156,7 @@ docker compose exec -T app bash -lc '
 log "📊 Status dos containers"
 docker compose ps
 
-PMA_PORT_MSG="$(grep -E '^PHPMYADMIN_PORT=' .env | cut -d= -f2- || echo 8080)"
+PMA_PORT_MSG="$(grep -E '^PHPMYADMIN_PORT=' .env | cut -d= -f2- || echo 8082)"
 APP_PORT_MSG="$(grep -E '^APP_PORT=' .env | cut -d= -f2- || echo 8081)"
 HOST_IP="$(hostname -I | awk '{print $1}')"
 
