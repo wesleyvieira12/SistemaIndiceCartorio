@@ -25,6 +25,7 @@ class ScheduledEmailController extends Controller
     {
         $email = new ScheduledEmail([
             'scheduled_at' => Carbon::now()->addHour()->format('Y-m-d H:i:s'),
+            'repeat_interval' => 'none',
         ]);
 
         return view('admin.scheduled_email.create', compact('email'));
@@ -39,6 +40,7 @@ class ScheduledEmailController extends Controller
             'body' => $data['body'],
             'recipients' => $data['recipients'],
             'scheduled_at' => $data['scheduled_at'],
+            'repeat_interval' => $data['repeat_interval'],
             'status' => 'pending',
             'created_by' => auth()->id(),
         ]);
@@ -89,6 +91,7 @@ class ScheduledEmailController extends Controller
             'body' => $data['body'],
             'recipients' => $data['recipients'],
             'scheduled_at' => $data['scheduled_at'],
+            'repeat_interval' => $data['repeat_interval'],
         ]);
 
         auth()->user()->logs()->create([
@@ -142,6 +145,7 @@ class ScheduledEmailController extends Controller
             'body' => 'required|string',
             'recipients' => 'required|string',
             'scheduled_at' => 'required|date',
+            'repeat_interval' => 'required|in:none,day,month,year',
         ]);
 
         $tmp = new ScheduledEmail(['recipients' => $request->input('recipients')]);
@@ -164,6 +168,7 @@ class ScheduledEmailController extends Controller
             'body' => $data['body'],
             'recipients' => implode("\n", $list),
             'scheduled_at' => Carbon::parse($data['scheduled_at'])->format('Y-m-d H:i:s'),
+            'repeat_interval' => $data['repeat_interval'],
         ];
     }
 }

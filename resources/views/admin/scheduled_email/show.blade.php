@@ -11,7 +11,8 @@
         <div class="box-body">
             <p><strong>Status:</strong> {{ $email->statusLabel() }}</p>
             <p><strong>Agendado para:</strong> {{ $email->scheduled_at ? $email->scheduled_at->format('d/m/Y H:i') : '-' }}</p>
-            <p><strong>Enviado em:</strong> {{ $email->sent_at ? $email->sent_at->format('d/m/Y H:i') : '-' }}</p>
+            <p><strong>Repetir:</strong> {{ $email->repeatLabel() }}</p>
+            <p><strong>Último envio:</strong> {{ $email->last_sent_at ? $email->last_sent_at->format('d/m/Y H:i') : ($email->sent_at ? $email->sent_at->format('d/m/Y H:i') : '-') }}</p>
             <p><strong>Título:</strong> {{ $email->subject }}</p>
             <p><strong>Destinatários:</strong></p>
             <ul>

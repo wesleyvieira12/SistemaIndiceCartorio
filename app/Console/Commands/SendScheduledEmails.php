@@ -53,12 +53,26 @@ class SendScheduledEmails extends Command
                     });
                 }
 
-                $email->status = 'sent';
                 $email->sent_at = Carbon::now();
+                $email->last_sent_at = Carbon::now();
                 $email->error_message = null;
-                $email->save();
 
-                $this->info('#'.$email->id.' enviado para '.count($recipients).' destinatário(s)');
+                if ($email->isRecurring()) {
+                    // Mantém pendente e agenda a próxima ocorrência
+                    $next = $email->nextScheduledAt(Carbon::parse($email->scheduled_at));
+                    // Se ainda ficou no passado (servidor parado), avança até o futuro
+                    while ($next->lte(Carbon::now())) {
+                        $next = $email->nextScheduledAt($next);
+                    }
+                    $email->scheduled_at = $next;
+                    $email->status = 'pending';
+                    $this->info('#'.$email->id.' enviado (repete '.$email->repeat_interval.'); próximo: '.$next->format('Y-m-d H:i'));
+                } else {
+                    $email->status = 'sent';
+                    $this->info('#'.$email->id.' enviado para '.count($recipients).' destinatário(s)');
+                }
+
+                $email->save();
             } catch (\Throwable $e) {
                 $email->status = 'failed';
                 $email->error_message = substr($e->getMessage(), 0, 1000);

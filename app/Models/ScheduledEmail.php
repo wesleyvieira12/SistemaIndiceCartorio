@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class ScheduledEmail extends Model
@@ -14,8 +15,10 @@ class ScheduledEmail extends Model
         'body',
         'recipients',
         'scheduled_at',
+        'repeat_interval',
         'status',
         'sent_at',
+        'last_sent_at',
         'error_message',
         'created_by',
     ];
@@ -23,9 +26,20 @@ class ScheduledEmail extends Model
     protected $dates = [
         'scheduled_at',
         'sent_at',
+        'last_sent_at',
         'created_at',
         'updated_at',
     ];
+
+    public static function repeatOptions()
+    {
+        return [
+            'none' => 'Não repetir',
+            'day' => 'Todos os dias',
+            'month' => 'Todo mês',
+            'year' => 'Todo ano',
+        ];
+    }
 
     public function creator()
     {
@@ -61,6 +75,42 @@ class ScheduledEmail extends Model
         ];
 
         return isset($labels[$this->status]) ? $labels[$this->status] : $this->status;
+    }
+
+    public function repeatLabel()
+    {
+        $options = self::repeatOptions();
+
+        return isset($options[$this->repeat_interval])
+            ? $options[$this->repeat_interval]
+            : 'Não repetir';
+    }
+
+    public function isRecurring()
+    {
+        return in_array($this->repeat_interval, ['day', 'month', 'year'], true);
+    }
+
+    /**
+     * Próxima data/hora de envio a partir da data atual do agendamento.
+     *
+     * @param  \Carbon\Carbon|null  $from
+     * @return \Carbon\Carbon
+     */
+    public function nextScheduledAt($from = null)
+    {
+        $base = $from ? $from->copy() : Carbon::parse($this->scheduled_at);
+
+        switch ($this->repeat_interval) {
+            case 'day':
+                return $base->addDay();
+            case 'month':
+                return $base->addMonth();
+            case 'year':
+                return $base->addYear();
+            default:
+                return $base;
+        }
     }
 
     public function isEditable()
