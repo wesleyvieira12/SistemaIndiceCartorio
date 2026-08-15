@@ -39,8 +39,6 @@
                         <td>
                             @if($email->status === 'pending' && $email->scheduled_at)
                                 {{ $email->scheduled_at->format('d/m/Y H:i') }}
-                            @elseif($email->status === 'pending')
-                                —
                             @else
                                 —
                             @endif

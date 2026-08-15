@@ -32,12 +32,18 @@
     @php
         $scheduledValue = old('scheduled_at');
         if (!$scheduledValue && !empty($email->scheduled_at)) {
-            $scheduledValue = \Carbon\Carbon::parse($email->scheduled_at)->format('Y-m-d\TH:i');
+            try {
+                $scheduledValue = \Carbon\Carbon::parse($email->scheduled_at)->format('d/m/Y H:i');
+            } catch (\Exception $e) {
+                $scheduledValue = $email->scheduled_at;
+            }
         }
     @endphp
-    <input type="datetime-local" name="scheduled_at" class="form-control" required
-           value="{{ $scheduledValue }}">
-    <p class="help-block">Fuso do servidor: America/Fortaleza</p>
+    <input type="text" name="scheduled_at" id="scheduled_at" class="form-control" required
+           placeholder="dd/mm/aaaa hh:mm"
+           value="{{ $scheduledValue }}"
+           autocomplete="off">
+    <p class="help-block">Formato: <strong>dia/mês/ano hora:minuto</strong> (ex.: 14/08/2026 21:30) — fuso America/Fortaleza</p>
     @if($errors->has('scheduled_at'))
         <span class="help-block">{{ $errors->first('scheduled_at') }}</span>
     @endif

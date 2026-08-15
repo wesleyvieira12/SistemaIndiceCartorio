@@ -23,10 +23,9 @@ class ScheduledEmailController extends Controller
 
     public function create()
     {
-        $email = new ScheduledEmail([
-            'scheduled_at' => Carbon::now()->addHour()->format('Y-m-d H:i:s'),
-            'repeat_interval' => 'none',
-        ]);
+        $email = new ScheduledEmail();
+        $email->scheduled_at = Carbon::now()->addHour();
+        $email->repeat_interval = 'none';
 
         return view('admin.scheduled_email.create', compact('email'));
     }
@@ -144,7 +143,7 @@ class ScheduledEmailController extends Controller
             'subject' => 'required|string|max:255',
             'body' => 'required|string',
             'recipients' => 'required|string',
-            'scheduled_at' => 'required|date',
+            'scheduled_at' => 'required|string',
             'repeat_interval' => 'required|in:none,day,month,year',
         ]);
 
@@ -154,6 +153,26 @@ class ScheduledEmailController extends Controller
         if (count($list) === 0) {
             $validator->after(function ($v) {
                 $v->errors()->add('recipients', 'Informe ao menos um e-mail válido.');
+            });
+        }
+
+        $scheduledAt = null;
+        $rawDate = trim((string) $request->input('scheduled_at'));
+        foreach (['d/m/Y H:i', 'd/m/Y H:i:s', 'd/m/Y'] as $format) {
+            try {
+                $scheduledAt = Carbon::createFromFormat($format, $rawDate);
+                if ($format === 'd/m/Y') {
+                    $scheduledAt->startOfDay();
+                }
+                break;
+            } catch (\Exception $e) {
+                $scheduledAt = null;
+            }
+        }
+
+        if (! $scheduledAt) {
+            $validator->after(function ($v) {
+                $v->errors()->add('scheduled_at', 'Use o formato dia/mês/ano hora:minuto (ex.: 14/08/2026 21:30).');
             });
         }
 
@@ -167,7 +186,7 @@ class ScheduledEmailController extends Controller
             'subject' => $data['subject'],
             'body' => $data['body'],
             'recipients' => implode("\n", $list),
-            'scheduled_at' => Carbon::parse($data['scheduled_at'])->format('Y-m-d H:i:s'),
+            'scheduled_at' => $scheduledAt->format('Y-m-d H:i:s'),
             'repeat_interval' => $data['repeat_interval'],
         ];
     }
